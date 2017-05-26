@@ -1,0 +1,46 @@
+{
+  "name": "node-token-jwt",
+  "main": "server.js",
+  "dependencies": {
+    "body-parser": "^1.17.1",
+    "express": "^4.15.2",
+    "jsonwebtoken": "^7.3.0",
+    "latest-version": "^3.1.0",
+    "mongoose": "^4.8.6",
+    "morgan": "^1.8.1",
+    "node-fetch": "^1.6.3"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.23.0",
+    "babel-preset-latest": "^6.22.0",
+    "babel-preset-stage-2": "^6.22.0",
+    "blanket": "^1.2.3",
+    "chai": "^3.5.0",
+    "chai-spies": "^0.7.1",
+    "chai-things": "^0.2.0",
+    "istanbul": "^0.4.5",
+    "mocha": "^3.2.0",
+    "nyc": "^10.3.2",
+    "should": "^11.2.1",
+    "sinon-chai": "^2.10.0",
+    "sinon-express-mock": "^1.3.0",
+    "sinon-stub-promise": "^4.0.0",
+    "supertest": "^3.0.0"
+  },
+  "scripts": {
+    "start": "nodemon server.js --exec babel-node --presets es2015,stage-2",
+    "test": "mocha",
+    "test:unit": "mocha -g ^Unit:: --compilers js:babel-core/register --recursive",
+    "test:int": "mocha -g ^Int:: --compilers js:babel-core/register --recursive",
+    "test:watch": "npm run tests -- --watch",
+    "cover": "nyc mocha --compilers js:babel-core/register --recursive"
+  },
+  "nyc": {
+    "exclude": [
+      "**/*_test.js",
+      "node_modules",
+      "models",
+      "clients"
+    ]
+  }
+}
