@@ -2,9 +2,7 @@ language: node_js
 node_js:
   - "iojs"
   - "7"
-env:
-  global:
-    - BABEL_ENV=test
-    install:
+install:
   - npm install -g babel-cli
   - npm install
+script: "mocha -g ^Unit:: --compilers js:babel-core/register --recursive"
