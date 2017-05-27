@@ -1,5 +1,5 @@
 {
-  "name": "node-token-jwt",
+  "name": "authentication-api",
   "main": "server.js",
   "dependencies": {
     "body-parser": "^1.17.1",
