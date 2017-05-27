@@ -42,7 +42,7 @@ describe('Unit::Module applyAuthToken', () => {
 				'_id' : 123
 			};
 
-			getNewToken = sandbox.stub(Token, 'getToken').callsFake(() => { return newToken });
+			getNewToken = sandbox.stub(Token, 'getToken').withArgs(userWithNullToken).callsFake(() => { return newToken });
 			saveUser = sandbox.stub(UserRepository, 'saveTokenToUser').returnsPromise();
 			saveUser.resolves(savedUser);
 			result = applyAuthToken(user);
