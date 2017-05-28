@@ -30,7 +30,7 @@
     "supertest": "^3.0.0"
   },
   "scripts": {
-    "start": "nodemon server.js --exec babel-node --presets es2015,stage-2",
+    "start": "nodemon server.js --exec babel-node --presets es2015 --babel-plugin-transform-object-assign,stage-2",
     "test": "mocha",
     "test:unit": "mocha -g ^Unit:: --compilers js:babel-core/register --recursive",
     "test:int": "mocha -g ^Int:: --compilers js:babel-core/register --recursive",
