@@ -19,6 +19,7 @@
     "babel-preset-stage-2": "^6.22.0",
     "chai": "^3.5.0",
     "chai-spies": "^0.7.1",
+    "coveralls": "^2.13.1",
     "istanbul": "^0.4.5",
     "mocha": "^3.2.0",
     "nyc": "^10.3.2",
@@ -34,8 +35,9 @@
     "test": "mocha",
     "test:unit": "mocha -g ^Unit:: --compilers js:babel-core/register --recursive",
     "test:int": "mocha -g ^Int:: --compilers js:babel-core/register --recursive",
-    "test:watch": "npm run tests -- --watch",
-    "cover": "nyc mocha --compilers js:babel-core/register --recursive"
+    "test:watch": "npm run test:unit -- --watch",
+    "cover": "nyc mocha --compilers js:babel-core/register --recursive",
+    "coveralls": "cat ./coverage/lcov.info | ./node_modules/.bin/coveralls"
   },
   "nyc": {
     "exclude": [
