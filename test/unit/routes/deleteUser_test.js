@@ -1,7 +1,6 @@
 import { deleteUserByToken } from '../../../routes/deleteUser';
 import * as Chai from 'chai';
 import Sinon from 'sinon';
-import { mockReq, mockRes } from 'sinon-express-mock';
 import SinonStubPromise from 'sinon-stub-promise';
 import * as UserClient from '../../../clients/userClient';
 
@@ -37,13 +36,12 @@ describe('Unit::Route deleteUser', () => {
 				admin:true,
 				_id:userIdOfUserActioningDelete
 			},
-			request = {
+			req = {
 				body:{
 					userId:userIdOfUserActioningDelete,
 					userIdToDelete:userIdToDelete
 				}
 			},
-			req = mockReq(request),
 			fetchingUser;
 	
 		beforeEach(() => {
@@ -60,7 +58,7 @@ describe('Unit::Route deleteUser', () => {
 
 		it('should request the user with the requesting users id', () => {
 
-			Expect(fetchingUser).calledWith(req.body.userId);
+			Expect(fetchingUser).calledWith(userIdOfUserActioningDelete);
 
 		});
 
@@ -97,13 +95,12 @@ describe('Unit::Route deleteUser', () => {
 				admin:false,
 				_id:userIdOfUserActioningDelete
 			},
-			request = {
+			req = {
 				body:{
 					userId:userIdOfUserActioningDelete,
 					userIdToDelete:userIdOfUserActioningDelete
 				}
 			},
-			req = mockReq(request),
 			fetchingUser;
 	
 		beforeEach(() => {
@@ -119,7 +116,7 @@ describe('Unit::Route deleteUser', () => {
 		});
 
 		it('should request the user with the requesting users id', () => {
-			Expect(fetchingUser).calledWith(req.body.userId);
+			Expect(fetchingUser).calledWith(userIdOfUserActioningDelete);
 		});
 
 		it('should call the user client to delete', () => {
@@ -155,13 +152,12 @@ describe('Unit::Route deleteUser', () => {
 				admin:false,
 				_id:userIdOfUserActioningDelete
 			},
-			request = {
+			req = {
 				body:{
 					userId:userIdOfUserActioningDelete,
 					userIdToDelete:userIdToDelete
 				}
 			},
-			req = mockReq(request),
 			fetchingUser;
 	
 		beforeEach(() => {
@@ -177,7 +173,7 @@ describe('Unit::Route deleteUser', () => {
 
 		it('should request the user with the requesting users id', () => {
 
-			Expect(fetchingUser).calledWith(req.body.userId);
+			Expect(fetchingUser).calledWith(userIdOfUserActioningDelete);
 
 		});
 
@@ -214,13 +210,12 @@ describe('Unit::Route deleteUser', () => {
 				admin:false,
 				_id:userIdOfUserActioningDelete
 			},
-			request = {
+			req = {
 				body:{
 					userId:userIdOfUserActioningDelete,
 					userIdToDelete:userIdToDelete
 				}
 			},
-			req = mockReq(request),
 			fetchingUser;
 	
 		beforeEach(() => {
@@ -236,7 +231,7 @@ describe('Unit::Route deleteUser', () => {
 
 		it('should request the user with the requesting users id', () => {
 
-			Expect(fetchingUser).calledWith(req.body.userId);
+			Expect(fetchingUser).calledWith(userIdOfUserActioningDelete);
 
 		});
 
@@ -273,13 +268,12 @@ describe('Unit::Route deleteUser', () => {
 				admin:true,
 				_id:userIdOfUserActioningDelete
 			},
-			request = {
+			req = {
 				body:{
 					userId:userIdOfUserActioningDelete,
 					userIdToDelete:userIdToDelete
 				}
 			},
-			req = mockReq(request),
 			fetchingUser;
 	
 		beforeEach(() => {
@@ -296,7 +290,7 @@ describe('Unit::Route deleteUser', () => {
 
 		it('should request the user with the requesting users id', () => {
 
-			Expect(fetchingUser).calledWith(req.body.userId);
+			Expect(fetchingUser).calledWith(userIdOfUserActioningDelete);
 
 		});
 

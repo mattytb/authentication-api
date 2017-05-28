@@ -1,5 +1,4 @@
 import { hasNameAndPassword } from '../../../../routes/validators/nameAndPasswordValidator';
-import { mockReq, mockRes } from 'sinon-express-mock';
 import Sinon from 'sinon';
 import * as Chai from 'chai';
 
@@ -18,13 +17,12 @@ describe('Unit::Route Validator nameAndPasswordValidator', () => {
 
 	describe('When both name and password are present, it', () => {
 
-		const request = {
+		const req = {
 			body:{
 				name:'matt',
 				password:'password'
 			}
-		},
-		req = mockReq(request);
+		};
 
 		beforeEach(() => {
 			next = Sinon.spy();
@@ -39,13 +37,12 @@ describe('Unit::Route Validator nameAndPasswordValidator', () => {
 
 	describe('When name is null, it', () => {
 
-		const request = {
+		const req = {
 			body:{
 				name:null,
 				password:'password'
 			}
-		},
-		req = mockReq(request);
+		};
 
 		beforeEach(() => {
 			next = Sinon.spy();
@@ -74,13 +71,12 @@ describe('Unit::Route Validator nameAndPasswordValidator', () => {
 
 	describe('When password is an empty string, it', () => {
 
-		const request = {
+		const req = {
 			body:{
 				name:'matt',
 				password:''
 			}
-		},
-		req = mockReq(request);
+		};
 
 		beforeEach(() => {
 			next = Sinon.spy();
@@ -108,13 +104,12 @@ describe('Unit::Route Validator nameAndPasswordValidator', () => {
 
 	describe('When both name and password are not supplied, it', () => {
 
-		const request = {
+		const req = {
 			body:{
 				name:'',
 				password:null
 			}
-		},
-		req = mockReq(request);
+		};
 
 		beforeEach(() => {
 			next = Sinon.spy();

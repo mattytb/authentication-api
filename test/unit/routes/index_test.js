@@ -1,6 +1,5 @@
 import * as Chai from 'chai';
 import Sinon from 'sinon';
-import { mockReq, mockRes } from 'sinon-express-mock';
 import SinonStubPromise from 'sinon-stub-promise';
 import * as UserClient from '../../../clients/userClient';
 import { getAllUsers } from '../../../routes/index';
@@ -8,8 +7,7 @@ import { getAllUsers } from '../../../routes/index';
 SinonStubPromise(Sinon);
 
 const Expect = Chai.expect,
-	request = {},
-	req = mockReq(request),
+	req = {},
 	userClientErrorMessage = "ErrorMessage";
 
 let sandbox = Sinon.sandbox.create(),

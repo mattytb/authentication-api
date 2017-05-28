@@ -1,5 +1,4 @@
 import { hasNamePasswordAndEmail } from '../../../../routes/validators/namePasswordAndEmailValidator';
-import { mockReq, mockRes } from 'sinon-express-mock';
 import Sinon from 'sinon';
 import * as Chai from 'chai';
 
@@ -18,14 +17,13 @@ describe('Unit::Route Validator namePasswordAndEmailValidator', () => {
 
 	describe('When all name password and email are present, it', () => {
 
-		const request = {
+		const req = {
 			body:{
 				name:'matt',
 				password:'password',
 				email:'matt@email.com'
 			}
-		},
-		req = mockReq(request);
+		};
 
 		beforeEach(() => {
 			next = Sinon.spy();
@@ -40,14 +38,13 @@ describe('Unit::Route Validator namePasswordAndEmailValidator', () => {
 
 	describe('When name is null, it', () => {
 
-		const request = {
+		const req = {
 			body:{
 				name:null,
 				password:'password',
 				email:'matt@email.com'
 			}
-		},
-		req = mockReq(request);
+		};
 
 		beforeEach(() => {
 			next = Sinon.spy();
@@ -76,14 +73,13 @@ describe('Unit::Route Validator namePasswordAndEmailValidator', () => {
 
 	describe('When password is an empty string, it', () => {
 
-		const request = {
+		const req = {
 			body:{
 				name:'matt',
 				password:'',
 				email:'matt@email.com'
 			}
-		},
-		req = mockReq(request);
+		};
 
 		beforeEach(() => {
 			next = Sinon.spy();
@@ -111,13 +107,12 @@ describe('Unit::Route Validator namePasswordAndEmailValidator', () => {
 
 	describe('When email is not sent, it', () => {
 
-		const request = {
+		const req = {
 			body:{
 				name:'matt',
 				password:''
 			}
-		},
-		req = mockReq(request);
+		};
 
 		beforeEach(() => {
 			next = Sinon.spy();
@@ -145,13 +140,12 @@ describe('Unit::Route Validator namePasswordAndEmailValidator', () => {
 
 	describe('When all name, password and are not supplied, it', () => {
 
-		const request = {
+		const req = {
 			body:{
 				name:'',
 				password:null
 			}
-		},
-		req = mockReq(request);
+		};
 
 		beforeEach(() => {
 			next = Sinon.spy();

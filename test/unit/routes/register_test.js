@@ -4,25 +4,23 @@ import * as ApplyAuthToken from '../../../modules/applyAuthToken';
 import * as UserClient from '../../../clients/userClient';
 import * as Chai from 'chai';
 import Sinon from 'sinon';
-import { mockReq, mockRes } from 'sinon-express-mock';
 import SinonStubPromise from 'sinon-stub-promise';
 
 SinonStubPromise(Sinon);
 
 const Expect = Chai.expect,
-	request = {
+	req = {
 		body:{
-			name:'matt',
+			name:'name',
 			password:'password',
 			email:'matt@email.com'
 		}
 	},
-	req = mockReq(request),
 	authenticatedToken = 'Token',
 	authenticatedUser = {
-		name:'matt',
+		name:'name',
 		password:'password',
-		email:'matt@email.com',
+		email:'name@email.com',
 		token:authenticatedToken,
 		_id:123
 	}
@@ -61,7 +59,7 @@ describe('Unit::Route register', () => {
 
 		it('should attempt to find user by name', () => {
 
-			Expect(fetchUserByName).calledWith(req.body.name);
+			Expect(fetchUserByName).calledWith('name');
 
 		});
 
@@ -129,13 +127,13 @@ describe('Unit::Route register', () => {
 
 		it('should attempt to find user by name', () => {
 
-			Expect(fetchUserByName).calledWith(req.body.name);
+			Expect(fetchUserByName).calledWith('name');
 
 		});
 
 		it('should not attempt save the new user', () => {
 
-			Expect(saveNewUser).not.calledWith(req.body.name, req.body.password);
+			Expect(saveNewUser).not.calledWith('name', 'password');
 
 		});
 
@@ -187,13 +185,13 @@ describe('Unit::Route register', () => {
 
 		it('should attempt to find user by name', () => {
 
-			Expect(fetchUserByName).calledWith(req.body.name);
+			Expect(fetchUserByName).calledWith('name');
 
 		});
 
 		it('should attempt to save the new user', () => {
 
-			Expect(saveNewUser).calledWith(req.body.name, req.body.password);
+			Expect(saveNewUser).calledWith('name', 'password');
 
 		});
 
@@ -246,13 +244,13 @@ describe('Unit::Route register', () => {
 
 		it('should attempt to find user by name', () => {
 
-			Expect(fetchUserByName).calledWith(req.body.name);
+			Expect(fetchUserByName).calledWith('name');
 
 		});
 
 		it('should save the new user', () => {
 
-			Expect(saveNewUser).calledWith(req.body.name, req.body.password);
+			Expect(saveNewUser).calledWith('name', 'password');
 
 		});
 

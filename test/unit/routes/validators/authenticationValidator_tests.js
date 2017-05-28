@@ -2,7 +2,6 @@ import * as TokenClient from '../../../../clients/tokenClient';
 import { isVerified } from '../../../../routes/validators/authenticationValidator';
 import * as Chai from 'chai';
 import Sinon from 'sinon';
-import { mockReq, mockRes } from 'sinon-express-mock';
 import SinonStubPromise from 'sinon-stub-promise';
 import SinonChai from 'sinon-chai';
 
@@ -14,7 +13,7 @@ const clientFailedToVerifyMessage = 'Client failed to verify',
 		Expect = Chai.expect;
 
 		let sandbox = Sinon.sandbox.create(),
-			res = res = { 
+			res = { 
 			json:(obj) => { res.body = obj },
 			status:function(status) {
 				res.statusValue = status;
@@ -29,12 +28,11 @@ describe('Unit::Route Validator authenticationValidator', () => {
 
 	describe('When verifying, it', () => {
 
-		const request = {
+		const req = {
 				body:{
 					token:'Token'
 				}
-			},
-			req = mockReq(request);
+			};
 
 		beforeEach((done) => {
 
@@ -51,7 +49,7 @@ describe('Unit::Route Validator authenticationValidator', () => {
 		});
 
 		it('should verify the token', () => {
-			Expect(verifyingToken).calledWith(req.body.token);
+			Expect(verifyingToken).calledWith('Token');
 		});
 
 		it('should call the next function on router', () => {
@@ -62,12 +60,11 @@ describe('Unit::Route Validator authenticationValidator', () => {
 
 	describe('When failing to verify because token was invalid, it', () => {
 
-		const request = {
+		const req = {
 				body:{
 					token:'Token'
 				}
-			},
-			req = mockReq(request);
+			};
 
 		beforeEach((done) => {
 			verifyingToken = sandbox.stub(TokenClient, 'verifyToken').returnsPromise();
@@ -83,7 +80,7 @@ describe('Unit::Route Validator authenticationValidator', () => {
 		});
 
 		it('should attempt to verify the token', () => {
-			Expect(verifyingToken).calledWith(req.body.token);
+			Expect(verifyingToken).calledWith('Token');
 		});
 
 		it('should not call the next function on router', () => {
@@ -106,17 +103,17 @@ describe('Unit::Route Validator authenticationValidator', () => {
 	});
 
 	describe('When failing to verify because no token, it', () => {
-		const request = {
-			body:{
+		const req = {
+				body:{
+				},
+				query:{},
+				headers:[]
 
-			},
-				headers :{}
-			},
-			req = mockReq(request);
+			};
 		
-
 		beforeEach((done) => {
 			next = Sinon.spy();
+			verifyingToken = sandbox.stub(TokenClient, 'verifyToken').returnsPromise();
 			isVerified(req, res, next);
 			done();
 		
@@ -127,7 +124,7 @@ describe('Unit::Route Validator authenticationValidator', () => {
 		});
 
 		it('should not attempt to verify the token', () => {
-			Expect(verifyingToken).not.calledWith(req.body);
+			Expect(verifyingToken).not.calledWith('token');
 		});
 
 		it('should not call the next function on router', () => {

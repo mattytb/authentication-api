@@ -3,7 +3,6 @@ import * as ApplyAuthToken from '../../../modules/applyAuthToken';
 import * as UserClient from '../../../clients/userClient';
 import * as Chai from 'chai';
 import Sinon from 'sinon';
-import { mockReq, mockRes } from 'sinon-express-mock';
 import SinonStubPromise from 'sinon-stub-promise';
 
 SinonStubPromise(Sinon);
@@ -11,14 +10,14 @@ SinonStubPromise(Sinon);
 const Expect = Chai.expect,
 	request = {
 		body:{
-			name:'matt',
+			name:'name',
 			password:'password'
 		}
 	},
-	req = mockReq(request),
+	req = request,
 	authenticatedToken = 'Token',
 	authenticatedUser = {
-		name:'matt',
+		name:'name',
 		password:'password',
 		token:authenticatedToken,
 		_id:123
@@ -54,7 +53,8 @@ describe('Unit::Route authenticate', () => {
 		});
 
 		it('should get user by name and password', () => {
-			Expect(fetchUser).calledWith(req.body.name, req.body.password);
+			console.log(req.body.name);
+			Expect(fetchUser).calledWith('name', 'password');
 		});
 
 		it('should apply the auth token to the user', () => {
@@ -110,7 +110,7 @@ describe('Unit::Route authenticate', () => {
 		});
 
 		it('should attempt to get user by name and password', () => {
-			Expect(fetchUser).calledWith(req.body.name, req.body.password);
+			Expect(fetchUser).calledWith('name', 'password');
 		});
 
 	  	it('should set the success value to false', () => {
@@ -157,7 +157,7 @@ describe('Unit::Route authenticate', () => {
 
 		it('should get user by name and password', () => {
 
-			Expect(fetchUser).calledWith(req.body.name, req.body.password);
+			Expect(fetchUser).calledWith('name', 'password');
 		});
 
 		it('should attempt to apply the auth token to the user', () => {
