@@ -6,4 +6,4 @@ install:
   - npm install -g babel-cli
   - npm install
 script: "mocha -g ^Unit:: --compilers js:babel-core/register --recursive"
-after_success: 'npm run cover'
+after_success: "npm run coverage"

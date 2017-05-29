@@ -37,7 +37,7 @@
     "test:unit": "mocha -g ^Unit:: --compilers js:babel-core/register --recursive",
     "test:int": "mocha -g ^Int:: --compilers js:babel-core/register --recursive",
     "test:watch": "npm run test:unit -- --watch",
-    "cover": "nyc mocha -g ^Unit:: --compilers js:babel-core/register --recursive"
+    "coverage": "nyc report --reporter=text-lcov | coveralls"
   },
   "nyc": {
     "exclude": [
