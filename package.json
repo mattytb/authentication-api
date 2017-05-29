@@ -37,14 +37,14 @@
     "test:unit": "mocha -g ^Unit:: --compilers js:babel-core/register --recursive",
     "test:int": "mocha -g ^Int:: --compilers js:babel-core/register --recursive",
     "test:watch": "npm run test:unit -- --watch",
-    "cover": "nyc mocha --compilers js:babel-core/register --recursive",
-    "coveralls": "cat ./coverage/lcov.info | ./node_modules/.bin/coveralls"
+    "cover": "nyc mocha -g ^Unit:: --compilers js:babel-core/register --recursive"
   },
   "nyc": {
     "exclude": [
       "**/*_test.js",
       "node_modules",
-      "models"
+      "models",
+      "clients"
     ]
   }
 }
