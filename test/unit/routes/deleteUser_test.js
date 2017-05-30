@@ -38,8 +38,10 @@ describe('Unit::Route deleteUser', () => {
 			},
 			req = {
 				body:{
-					userId:userIdOfUserActioningDelete,
-					userIdToDelete:userIdToDelete
+					authorisedUserId:userIdOfUserActioningDelete,
+				},
+				params:{
+					user_id:userIdToDelete
 				}
 			},
 			fetchingUser;
@@ -97,8 +99,10 @@ describe('Unit::Route deleteUser', () => {
 			},
 			req = {
 				body:{
-					userId:userIdOfUserActioningDelete,
-					userIdToDelete:userIdOfUserActioningDelete
+					authorisedUserId:userIdOfUserActioningDelete,
+				},
+				params:{
+					user_id:userIdOfUserActioningDelete
 				}
 			},
 			fetchingUser;
@@ -154,8 +158,10 @@ describe('Unit::Route deleteUser', () => {
 			},
 			req = {
 				body:{
-					userId:userIdOfUserActioningDelete,
-					userIdToDelete:userIdToDelete
+					authorisedUserId:userIdOfUserActioningDelete,
+				},
+				params:{
+					user_id:userIdToDelete
 				}
 			},
 			fetchingUser;
@@ -179,7 +185,7 @@ describe('Unit::Route deleteUser', () => {
 
 		it('should not call the user client to delete', () => {
 
-			Expect(deletingUser).not.calledWith(req.userIdToDelete);
+			Expect(deletingUser).not.calledWith(userIdToDelete);
 
 		});
 
@@ -212,8 +218,10 @@ describe('Unit::Route deleteUser', () => {
 			},
 			req = {
 				body:{
-					userId:userIdOfUserActioningDelete,
-					userIdToDelete:userIdToDelete
+					authorisedUserId:userIdOfUserActioningDelete,
+				},
+				params:{
+					user_id:userIdToDelete
 				}
 			},
 			fetchingUser;
@@ -270,8 +278,10 @@ describe('Unit::Route deleteUser', () => {
 			},
 			req = {
 				body:{
-					userId:userIdOfUserActioningDelete,
-					userIdToDelete:userIdToDelete
+					authorisedUserId:userIdOfUserActioningDelete,
+				},
+				params:{
+					user_id:userIdToDelete
 				}
 			},
 			fetchingUser;

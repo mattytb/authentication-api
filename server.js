@@ -11,13 +11,15 @@ const port = process.env.PORT || 8080;
 Mongoose.Promise = global.Promise;
 Mongoose.connect(Config.database); 
 
-let app = Express();
+let app = Express(),
+	router = Express.Router();
 
 app.use(BodyParser.urlencoded({ extended: false }));
 app.use(BodyParser.json());
 app.use(Morgan('dev'));
+app.use('/api', router);
 
-AddRoutes(app);
+AddRoutes(router);
 
 app.listen(port);
 

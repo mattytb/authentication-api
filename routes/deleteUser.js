@@ -4,11 +4,11 @@ module.exports = {
 
 	deleteUserByToken : (req, res) => {
 
-		getUserById(req.body.userId).then(user => {
+		getUserById(req.body.authorisedUserId).then(user => {
 
-			if(req.body.userIdToDelete == user._id || user.admin){
+			if(req.params.user_id == user._id || user.admin){
 
-				deleteUser(req.body.userIdToDelete).then(userId => {
+				deleteUser(req.params.user_id).then(userId => {
 
 					res.status(200).json({
 						success:true,

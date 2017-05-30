@@ -7,12 +7,12 @@ import { isVerified } from './routes/validators/authenticationValidator';
 import { hasNameAndPassword } from './routes/validators/nameAndPasswordValidator';
 import { hasNamePasswordAndEmail } from './routes/validators/namePasswordAndEmailValidator';
 
-function addRoutes(app){
+function addRoutes(router){
 
-	app.get('/', isVerified, Index.getAllUsers);
-	app.post('/authenticate', hasNameAndPassword, Authenticate.getAuthToken);  
-	app.post('/register', hasNamePasswordAndEmail,  Register.registerUser);
-	app.delete('/deleteUser', isVerified, DeleteUser.deleteUserByToken);
+	router.get('/users', isVerified, Index.getAllUsers);  
+	router.post('/users', hasNamePasswordAndEmail,  Register.registerUser);
+	router.delete('/users/:user_id', isVerified, DeleteUser.deleteUserByToken);
+	router.post('/authenticate', hasNameAndPassword, Authenticate.getAuthToken);
 } 
 
 module.exports = addRoutes;

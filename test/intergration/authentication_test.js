@@ -13,7 +13,7 @@ describe('Authentication', () => {
 
     it('should return the user a token when user supplies name, password and email', (done) => {
         server
-        .post('/register')
+        .post('/api/users')
         .send({name : 'Super Test', password : 'Password', email : 'email@supertest.com'})
         .expect("Content-type",/json/)
         .expect(200)
@@ -27,7 +27,7 @@ describe('Authentication', () => {
 
     it('should allow the user to access data requiring validation when requesting with token', (done) => {
         server
-        .get('/')
+        .get('/api/users')
         .send({token:token})
         .expect("Content-type",/json/)
         .expect(200)
@@ -44,7 +44,7 @@ describe('Authentication', () => {
 
     it('should allow the user to re-authenticate with thier name and password', (done) => {
         server
-        .post('/authenticate')
+        .post('/api/authenticate')
         .send({name : 'Super Test', password : 'Password'})
         .expect("Content-type",/json/)
         .expect(200)
@@ -59,7 +59,7 @@ describe('Authentication', () => {
 
     it('should allow the user to login to pages requiring validation when requesting with the new token', (done) => {
         server
-        .get('/')
+        .get('/api/users')
         .send({token:token})
         .expect("Content-type",/json/)
         .expect(200)
@@ -73,7 +73,7 @@ describe('Authentication', () => {
 
     it('should not allow the user to re-authenticate with incorrect password', (done) => {
         server
-        .post('/authenticate')
+        .post('/api/authenticate')
         .send({name : 'Super Test', password : 'password-wrong'})
         .expect("Content-type",/json/)
         .expect(401)
@@ -90,7 +90,7 @@ describe('Authentication', () => {
 
     it('should not supply a token', (done) => {
         server
-        .post('/register')
+        .post('/api/users')
         .send({name : 'Super Test', password : 'Password'})
         .expect("Content-type",/json/)
         .expect(403)
@@ -107,7 +107,7 @@ describe('Authentication', () => {
 
     it('should not allow access to the data', (done) => {
         server
-        .get('/')
+        .get('/api/users')
         .send({token:''})
         .expect("Content-type",/json/)
         .expect(500)
@@ -124,8 +124,8 @@ describe('Authentication', () => {
 
     it('should return success message including the users deleted id', (done) => {
         server
-        .delete('/deleteUser')
-        .send({token:token, userIdToDelete:userId, userId:userId})
+        .delete(`/api/users/${userId}`)
+        .send({token:token, authorisedUserId:userId})
         .expect("Content-type",/json/)
         .expect(200)
         .end(function(err,res){
@@ -137,7 +137,7 @@ describe('Authentication', () => {
 
     it('should not allow the user to authenticate with deleted name and password', (done) => {
         server
-        .post('/authenticate')
+        .post('/api/authenticate')
         .send({name : 'Super Test', password : 'Password'})
         .expect("Content-type",/json/)
         .expect(401)
