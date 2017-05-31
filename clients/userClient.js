@@ -1,5 +1,5 @@
 import User from '../models/user';
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 const saltRounds = 10;
 
 export function getUserByName(name){
