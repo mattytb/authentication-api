@@ -1,4 +1,6 @@
 import User from '../models/user';
+import bcrypt from 'bcrypt';
+const saltRounds = 10;
 
 export function getUserByName(name){
 
@@ -6,8 +8,12 @@ export function getUserByName(name){
 
 		User.findOne({name: name}).then(user => 
 		{
-			user ? resolve(user) : reject("unable to find user");
-		});
+			user ? resolve(user) : reject("unable to find user")
+
+		})
+		.catch(
+			err => reject("unable to find user")
+		);
 
 	});
 }
@@ -18,8 +24,12 @@ export function getUserById(id){
 
 		User.findOne({_id: id}).then(user => 
 		{
-			user ? resolve(user) : reject("unable to find user");
-		});
+			user ? resolve(user) : reject("unable to find user")
+		})
+		.catch(
+
+			err => reject("unable to find user")
+		);
 
 	});
 }
@@ -28,10 +38,31 @@ export function getUserByNameAndPassword(name, password){
 
 	return new Promise((resolve, reject) => {
 
-		User.findOne({name: name, password:password}).then(user => 
+		User.findOne({name: name}).then(user => 
 		{
-			user ? resolve(user) : reject("unable to find user with those credentials");
-		});
+			
+			if(user){
+
+				bcrypt.compare(password, user.password).then(res => {
+
+					res ? resolve(user) : reject("unable to find users with those credentials")
+
+				})
+				.catch(
+
+					res => reject("unable to find users with those credentials")
+				);
+			}
+			else {
+
+				reject("unable to find users with those credentials")
+			}	
+
+		})
+		.catch(
+
+			err => reject("unable to find users with those credentials")
+		);
 
 	});
 }
@@ -44,7 +75,8 @@ export function saveTokenToUser(userId, token){
 			user.token = token;
 			user.save();
 			resolve(user);
-		}).catch(
+		})
+		.catch(
 			err =>	reject("unable to find user to save token to user")
 		);
 	});
@@ -54,40 +86,44 @@ export function saveNewUser(username, password, email, admin){
 
 	return new Promise((resolve, reject) => {
 
-		const newUser = new User({ 
-            name: username, 
-            password: password,
+		let newUser = new User({ 
+            name: username,
             email: email,
             token:"",
             admin:true
       	});
 
-      	newUser.save().then(user => {
+      	bcrypt.hash(password, saltRounds).then(hash => {
 
-      		resolve(user);
+    		newUser.password = hash;
 
-      	}).catch(err => {
+	        newUser.save().then(
 
-      		reject('problem saving user');
+	        	user => resolve(user)
+        	)
+	        .catch(
 
-      	});
-      	
-	});
+	      		err => reject('problem saving user')
+			);
+		});
+
+    });
  }
 
  export function getUsers(){
 
  	return new Promise((resolve, reject) => {
 
-	 	User.find({}).then(users => {
+	 	User.find({})
+	 	.then(
 
-	  		resolve(users);
+			users => resolve(users)
 
-	  	}).catch(err => {
+	 	)
+	 	.catch(
 
-			reject('could not find users');
-
-		});;
+	 		err => reject('could not find users')
+		);
 
 	});
  }

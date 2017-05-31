@@ -14,7 +14,7 @@ describe('Authentication', () => {
     it('should return the user a token when user supplies name, password and email', (done) => {
         server
         .post('/api/users')
-        .send({name : 'Super Test', password : 'Password', email : 'email@supertest.com'})
+        .send({name : 'Super Test', password : 'Password', email : 'email@supertester.com'})
         .expect("Content-type",/json/)
         .expect(200)
         .end(function(err,res){

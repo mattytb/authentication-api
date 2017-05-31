@@ -1,22 +1,26 @@
 import mongoose from 'mongoose';
-var Schema = mongoose.Schema;
 
-module.exports = mongoose.model('User', new Schema({ 
+let userSchema = mongoose.Schema({
     name: {
-    	type:String, 
-    	required:true
+        type:String, 
+        required:true,
+        unique:true
     },
     password: {
-    	type: String, 
-    	required:true
+        type: String, 
+        required:true
     },
     email : {
         type: String,
-        required:true
+        required:true,
+        unique:true
     },
     admin: {
         type:Boolean
     },
     created: { type: Date},
     token: String
-}));
+});
+
+module.exports = mongoose.model('User', userSchema);
+
