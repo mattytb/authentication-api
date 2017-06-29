@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-
+mongoose.Promise = Promise;
 let userSchema = mongoose.Schema({
     name: {
         type:String, 

@@ -1,9 +1,12 @@
 import { applyAuthToken } from '../../../modules/applyAuthToken';
-import * as UserRepository from '../../../clients/userClient';
+import * as UserClient from '../../../clients/userClient';
 import * as Token from '../../../clients/tokenClient';
 import * as Chai from 'chai';
 import Sinon from 'sinon';
 import SinonChai from 'sinon-chai';
+import SinonStubPromise from 'sinon-stub-promise';
+
+SinonStubPromise(Sinon);
 
 Chai.use(SinonChai);
 
@@ -43,7 +46,7 @@ describe('Unit::Module applyAuthToken', () => {
 			};
 
 			getNewToken = sandbox.stub(Token, 'getToken').withArgs(userWithNullToken).callsFake(() => { return newToken });
-			saveUser = sandbox.stub(UserRepository, 'saveTokenToUser').returnsPromise();
+			saveUser = sandbox.stub(UserClient, 'saveTokenToUser').returnsPromise();
 			saveUser.resolves(savedUser);
 			result = applyAuthToken(user);
 			done();
@@ -114,7 +117,7 @@ describe('Unit::Module applyAuthToken', () => {
 			};
 
 			getNewToken = sandbox.stub(Token, 'getToken').withArgs(userWithNullToken).callsFake(() => { return newToken });
-			saveUser = sandbox.stub(UserRepository, 'saveTokenToUser').returnsPromise();
+			saveUser = sandbox.stub(UserClient, 'saveTokenToUser').returnsPromise();
 			saveUser.rejects(errorMessageFromClient);
 			result = applyAuthToken(user);
 			done();

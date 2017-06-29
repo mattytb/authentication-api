@@ -44,3 +44,5 @@ typings/
 
 # dotenv environment variables file
 .env
+
+config.js

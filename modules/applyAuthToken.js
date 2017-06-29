@@ -9,16 +9,9 @@ export function applyAuthToken(user){
 
 		const token = getToken(user);
 
-		saveTokenToUser(user._id, token).then(user => {
-
-			resolve(user);
-
-		})
-		.catch(err => {
-
-			reject(err)
-			
-		});
+		saveTokenToUser(user._id, token)
+		.then(user => resolve(user))
+		.catch(err => reject(err));
 
   	});
 }

@@ -8,13 +8,9 @@ app.set('superSecret', Config.secret);
 app.set('tokenExpires', Config.tokenExpiry)
 
 export function getToken(user){
-
 	return WebToken.sign(user, app.get('superSecret'), {
-
 		expiresIn: app.get('tokenExpires')
-
 	});
-
 }
 
 export function verifyToken(token){

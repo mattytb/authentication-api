@@ -8,11 +8,13 @@ import Config from './config';
 
 const port = process.env.PORT || 8080; 
 
-Mongoose.Promise = global.Promise;
+
 Mongoose.connect(Config.database); 
+
 
 let app = Express(),
 	router = Express.Router();
+	
 
 app.use(BodyParser.urlencoded({ extended: false }));
 app.use(BodyParser.json());

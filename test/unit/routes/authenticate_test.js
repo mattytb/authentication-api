@@ -53,7 +53,6 @@ describe('Unit::Route authenticate', () => {
 		});
 
 		it('should get user by name and password', () => {
-			console.log(req.body.name);
 			Expect(fetchUser).calledWith('name', 'password');
 		});
 

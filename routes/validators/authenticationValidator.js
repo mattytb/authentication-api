@@ -10,11 +10,7 @@ module.exports = {
 
       verifyToken(token)
       
-      .then(() => 
-
-        next()
-
-      )
+      .then(() => next())
       .catch(err => {
 
         res.status(401).json({ success: false, message: err });
