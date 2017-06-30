@@ -1,9 +1,13 @@
 language: node_js
 node_js:
-  - "iojs"
-  - "7"
+- iojs
+- '7'
 install:
-  - npm install -g babel-cli
-  - npm install
-script: "mocha -g ^Unit:: --compilers js:babel-core/register --recursive"
-after_success: "nyc _mocha -g ^Unit:: --compilers js:babel-core/register --recursive && nyc report --reporter=text-lcov | coveralls"
+- npm install -g babel-cli
+- npm install
+script: 'mocha -g ^Unit:: --compilers js:babel-core/register --recursive'
+after_success: 'nyc _mocha -g ^Unit:: --compilers js:babel-core/register --recursive
+  && nyc report --reporter=text-lcov | coveralls'
+before_install:
+- openssl aes-256-cbc -K $encrypted_0edd0fc670eb_key -iv $encrypted_0edd0fc670eb_iv
+  -in config.js.enc -out config.js -d
