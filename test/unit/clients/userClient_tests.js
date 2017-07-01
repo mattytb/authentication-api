@@ -5,7 +5,7 @@ import bcrypt from 'bcryptjs';
 import * as User from '../../../models/user';
 import mongoose from 'mongoose';
 import * as newUserProvider from '../../../models/providers/newUserProvider';
-import * as UserUtils from '../../../models/utils/userUtils';
+import * as userUtils from '../../../models/utils/userUtils';
 
 const Expect = Chai.expect;
 
@@ -167,6 +167,76 @@ describe('Unit::userClient', () => {
 		});
 
 	});
+
+	describe('When successfully saving a new user', () => {
+
+		it('it should request a new user providing username, email and admin', () => {
+			Expect(providingUser).calledWith(username, email, admin);
+		});
+
+		it('it should request the amount of salt rounds to use in hashing', () => {
+			Expect(providingSaltRounds).to.be.called;
+		})
+
+		it('it should request hashing of the provided password', ()=>{
+			Expect(hashingPassword).calledWith(password, providedSaltRounds);
+		});
+
+		it('it have placed the hash on the fetched user', () => {
+			Expect(providedUser.password).to.equal(hash);
+		});
+
+		it('it should request the provided user be saved', () => {
+			Expect(savingUser).calledWith(providedUser);
+		}); 
+
+		it('it should return the saved user', () => {
+			return result.then((data) => {
+				Expect(data).to.equal(savedUser);
+			});
+		});
+
+		const username = 'matt',
+			email = 'email',
+			admin = false,
+			hash = 'hash',
+			password = 'password',
+			providedUser = {
+				'name':'matt',
+				'email':'email',
+				'admin':false
+			},
+			savedUser = {
+				'name':'matt',
+				'email':'email',
+				'admin':false,
+				'password':'hash'
+			},
+			providedSaltRounds = 2;
+
+		let providingUser,
+			providingSaltRounds,
+			hashingPassword,
+			savingUser,
+			result,
+			sandbox = Sinon.sandbox.create();
+
+		beforeEach(() => {
+			providingUser = sandbox.stub(newUserProvider, 'provideNewUser').callsFake(() => {return providedUser});
+			providingSaltRounds = sandbox.stub(userUtils, 'getSaltRounds').callsFake(() => {return providedSaltRounds});
+			hashingPassword = sandbox.stub(bcrypt, 'hash').returnsPromise();
+			hashingPassword.resolves(hash);
+			savingUser = sandbox.stub(userUtils, 'saveUser').returnsPromise();
+			savingUser.resolves(savedUser);
+			result = UserClient.saveNewUser(username, password,email, admin);
+		});
+
+		afterEach(function() {
+			sandbox.restore();
+		});
+
+	});
+
 
 	describe('When successfully getting users', () => {
 

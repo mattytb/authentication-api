@@ -44,8 +44,7 @@
   "nyc": {
     "exclude": [
       "**/*_test.js",
-      "node_modules",
-      "models"
+      "node_modules"
     ]
   }
 }
