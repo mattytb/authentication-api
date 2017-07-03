@@ -3,12 +3,6 @@ import * as UserClient from '../../../clients/userClient';
 import * as Token from '../../../clients/tokenClient';
 import * as Chai from 'chai';
 import Sinon from 'sinon';
-import SinonChai from 'sinon-chai';
-import SinonStubPromise from 'sinon-stub-promise';
-
-SinonStubPromise(Sinon);
-
-Chai.use(SinonChai);
 
 const Expect = Chai.expect;
 

@@ -46,6 +46,43 @@ describe('Unit::userClient', () => {
 		});
 
 	});
+
+	describe('When getting user by email', () => {
+
+		it('it should request the user by email', () => {
+			Expect(gettingUserByEmail).calledWith({email:email});
+		});
+
+		it('it should return the user', () => {
+			return result.then((data) =>{
+				Expect(data).to.equal(fetchedUser);
+			})
+		});
+
+		const email = 'matt@email.com',
+			fetchedUser = {
+				'name':'matt',
+				'token':'token',
+				'_id' : 123,
+				'email':'matt@email.com'
+			};
+
+		let gettingUserByEmail,
+			result,
+			sandbox = Sinon.sandbox.create();
+
+		beforeEach(() => {
+			
+			gettingUserByEmail = sandbox.stub(mongoose.Model, 'findOne').returnsPromise();
+			gettingUserByEmail.resolves(fetchedUser);
+			result = UserClient.getUserByEmail(email);
+		});
+
+		afterEach(function() {
+			sandbox.restore();
+		});
+
+	});
 	
 	describe('When successfully getting user by id', () => {
 
@@ -84,10 +121,10 @@ describe('Unit::userClient', () => {
 	});
 	
 
-	describe('When successfully getting user by name and password', () => {
+	describe('When successfully getting user by email and password', () => {
 
-		it('it should request the user by name', () => {
-			Expect(gettingUserByName).calledWith({name:name});
+		it('it should request the user by email', () => {
+			Expect(gettingUserByEmail).calledWith({email:email});
 		});
 
 		it('it should test the password against the password provided and the fetched users password', () => {
@@ -100,27 +137,28 @@ describe('Unit::userClient', () => {
 			});
 		});
 
-		const name = "matt",
+		const email = "matt@email.com",
 			password = "password",
 			fetchedUser = {
-					'name':'matt',
-					'token':'token',
-					'_id' : 123,
-					'password':'password'
-				};
+				'name':'matt',
+				'email':'matt@email.com',
+				'token':'token',
+				'_id' : 123,
+				'password':'password'
+			};
 
-		let gettingUserByName,
+		let gettingUserByEmail,
 			result,
 			evaluatingBcryptPassword,
 			sandbox = Sinon.sandbox.create();
 
 		beforeEach(() => {
 			
-			gettingUserByName = sandbox.stub(mongoose.Model, 'findOne').returnsPromise();
-			gettingUserByName.resolves(fetchedUser);
+			gettingUserByEmail = sandbox.stub(mongoose.Model, 'findOne').returnsPromise();
+			gettingUserByEmail.resolves(fetchedUser);
 			evaluatingBcryptPassword = sandbox.stub(bcrypt, 'compare').returnsPromise();
 			evaluatingBcryptPassword.resolves(true);
-			result = UserClient.getUserByNameAndPassword(name, password);
+			result = UserClient.getUserByEmailAndPassword(email, password);
 			
 		});
 

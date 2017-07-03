@@ -1,12 +1,12 @@
 
 import {applyAuthToken} from '../modules/applyAuthToken';
-import { getUserByNameAndPassword } from '../clients/userClient';
+import { getUserByEmailAndPassword } from '../clients/userClient';
 
 module.exports = {
 
 	getAuthToken : (req, res) => {
 
-		getUserByNameAndPassword(req.body.name, req.body.password).then(user => {
+		getUserByEmailAndPassword(req.body.email, req.body.password).then(user => {
 
 			applyAuthToken(user).then(user => {
 

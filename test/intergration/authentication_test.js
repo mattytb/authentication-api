@@ -21,6 +21,7 @@ describe('Authentication', () => {
           res.status.should.equal(200);
           res.body.success.should.equal(true);
           token = res.body.token;
+          userId = res.body.userId;
           done();
         });
     });
@@ -28,7 +29,7 @@ describe('Authentication', () => {
     it('should allow the user to access data requiring validation when requesting with token', (done) => {
         server
         .get('/api/users')
-        .send({token:token})
+        .send({userId: userId, token:token})
         .expect("Content-type",/json/)
         .expect(200)
         .end(function(err,res){
@@ -38,14 +39,27 @@ describe('Authentication', () => {
           done();
         });
     });
+
+    it('should not allow another user to use the newly created users email', (done) => {
+        server
+        .post('/api/users')
+        .send({name : 'Super Test2', password : 'Password2', email : 'email@supertester.com'})
+        .expect("Content-type",/json/)
+        .expect(200)
+        .end(function(err,res){
+          res.status.should.equal(409);
+          res.body.success.should.equal(false);
+          done();
+        });
+    });
   });
 
   describe('Int::when a users token has expired and he needs to re-authenticate, it', () => {
 
-    it('should allow the user to re-authenticate with thier name and password', (done) => {
+    it('should allow the user to re-authenticate with their email and password', (done) => {
         server
         .post('/api/authenticate')
-        .send({name : 'Super Test', password : 'Password'})
+        .send({email : 'email@supertester.com', password : 'Password'})
         .expect("Content-type",/json/)
         .expect(200)
         .end(function(err,res){
@@ -60,7 +74,7 @@ describe('Authentication', () => {
     it('should allow the user to login to pages requiring validation when requesting with the new token', (done) => {
         server
         .get('/api/users')
-        .send({token:token})
+        .send({userId:userId, token:token})
         .expect("Content-type",/json/)
         .expect(200)
         .end(function(err,res){
@@ -74,7 +88,7 @@ describe('Authentication', () => {
     it('should not allow the user to re-authenticate with incorrect password', (done) => {
         server
         .post('/api/authenticate')
-        .send({name : 'Super Test', password : 'password-wrong'})
+        .send({email : 'email@supertester.com', password : 'password-wrong'})
         .expect("Content-type",/json/)
         .expect(401)
         .end(function(err,res){
@@ -91,7 +105,7 @@ describe('Authentication', () => {
     it('should not supply a token', (done) => {
         server
         .post('/api/users')
-        .send({name : 'Super Test', password : 'Password'})
+        .send({email : 'email@supertester.com', password : 'Password'})
         .expect("Content-type",/json/)
         .expect(403)
         .end(function(err,res){
@@ -108,7 +122,7 @@ describe('Authentication', () => {
     it('should not allow access to the data', (done) => {
         server
         .get('/api/users')
-        .send({token:''})
+        .send({userId:userId, token:''})
         .expect("Content-type",/json/)
         .expect(500)
         .end(function(err,res){
@@ -125,7 +139,7 @@ describe('Authentication', () => {
     it('should return success message including the users deleted id', (done) => {
         server
         .delete(`/api/users/${userId}`)
-        .send({token:token, authorisedUserId:userId})
+        .send({token:token, userId:userId})
         .expect("Content-type",/json/)
         .expect(200)
         .end(function(err,res){
@@ -138,7 +152,7 @@ describe('Authentication', () => {
     it('should not allow the user to authenticate with deleted name and password', (done) => {
         server
         .post('/api/authenticate')
-        .send({name : 'Super Test', password : 'Password'})
+        .send({email : 'email@supertester.com', password : 'Password'})
         .expect("Content-type",/json/)
         .expect(401)
         .end(function(err,res){

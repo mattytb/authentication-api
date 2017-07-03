@@ -1,4 +1,4 @@
-import { hasNameAndPassword } from '../../../../routes/validators/nameAndPasswordValidator';
+import { hasEmailAndPassword } from '../../../../routes/validators/emailAndPasswordValidator';
 import Sinon from 'sinon';
 import * as Chai from 'chai';
 
@@ -15,18 +15,18 @@ let res = {
 
 describe('Unit::Route Validator nameAndPasswordValidator', () => {
 
-	describe('When both name and password are present, it', () => {
+	describe('When both email and password are present, it', () => {
 
 		const req = {
 			body:{
-				name:'matt',
+				email:'matt',
 				password:'password'
 			}
 		};
 
 		beforeEach(() => {
 			next = Sinon.spy();
-			hasNameAndPassword(req, res, next);
+			hasEmailAndPassword(req, res, next);
 		});
 
 		it('should call the next function on router', () => {
@@ -35,18 +35,18 @@ describe('Unit::Route Validator nameAndPasswordValidator', () => {
 
 	});
 
-	describe('When name is null, it', () => {
+	describe('When email is null, it', () => {
 
 		const req = {
 			body:{
-				name:null,
+				email:null,
 				password:'password'
 			}
 		};
 
 		beforeEach(() => {
 			next = Sinon.spy();
-			hasNameAndPassword(req, res, next);
+			hasEmailAndPassword(req, res, next);
 		});
 
 		it('should not call the next function on router', () => {
@@ -73,14 +73,14 @@ describe('Unit::Route Validator nameAndPasswordValidator', () => {
 
 		const req = {
 			body:{
-				name:'matt',
+				email:'matt@email.com',
 				password:''
 			}
 		};
 
 		beforeEach(() => {
 			next = Sinon.spy();
-			hasNameAndPassword(req, res, next);
+			hasEmailAndPassword(req, res, next);
 		});
 
 		it('should not call the next function on router', () => {
@@ -102,18 +102,18 @@ describe('Unit::Route Validator nameAndPasswordValidator', () => {
 
 	});
 
-	describe('When both name and password are not supplied, it', () => {
+	describe('When both email and password are not supplied, it', () => {
 
 		const req = {
 			body:{
-				name:'',
+				email:'',
 				password:null
 			}
 		};
 
 		beforeEach(() => {
 			next = Sinon.spy();
-			hasNameAndPassword(req, res, next);
+			hasEmailAndPassword(req, res, next);
 		});
 
 		it('should not call the next function on router', () => {

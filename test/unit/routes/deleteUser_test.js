@@ -1,10 +1,7 @@
 import { deleteUserByToken } from '../../../routes/deleteUser';
 import * as Chai from 'chai';
 import Sinon from 'sinon';
-import SinonStubPromise from 'sinon-stub-promise';
 import * as UserClient from '../../../clients/userClient';
-
-SinonStubPromise(Sinon);
 
 const Expect = Chai.expect,
 	deletingUserFailureMessage = "failed to delete user",
@@ -38,7 +35,7 @@ describe('Unit::Route deleteUser', () => {
 			},
 			req = {
 				body:{
-					authorisedUserId:userIdOfUserActioningDelete,
+					userId:userIdOfUserActioningDelete,
 				},
 				params:{
 					user_id:userIdToDelete
@@ -99,7 +96,7 @@ describe('Unit::Route deleteUser', () => {
 			},
 			req = {
 				body:{
-					authorisedUserId:userIdOfUserActioningDelete,
+					userId:userIdOfUserActioningDelete,
 				},
 				params:{
 					user_id:userIdOfUserActioningDelete
@@ -158,7 +155,7 @@ describe('Unit::Route deleteUser', () => {
 			},
 			req = {
 				body:{
-					authorisedUserId:userIdOfUserActioningDelete,
+					userId:userIdOfUserActioningDelete,
 				},
 				params:{
 					user_id:userIdToDelete
@@ -218,7 +215,7 @@ describe('Unit::Route deleteUser', () => {
 			},
 			req = {
 				body:{
-					authorisedUserId:userIdOfUserActioningDelete,
+					userId:userIdOfUserActioningDelete,
 				},
 				params:{
 					user_id:userIdToDelete
@@ -278,7 +275,7 @@ describe('Unit::Route deleteUser', () => {
 			},
 			req = {
 				body:{
-					authorisedUserId:userIdOfUserActioningDelete,
+					userId:userIdOfUserActioningDelete,
 				},
 				params:{
 					user_id:userIdToDelete

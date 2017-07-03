@@ -16,6 +16,19 @@ export function getUserByName(name){
 	});
 }
 
+export function getUserByEmail(email){
+
+	return new Promise((resolve, reject) => {
+
+		User.findOne({email: email}).then(user => 
+		{
+			user ? resolve(user) : reject(new Error("no user found for name"))
+		})
+		.catch(err => reject(err));
+
+	});
+}
+
 export function getUserById(id){
 
 	return new Promise((resolve, reject) => {
@@ -29,11 +42,11 @@ export function getUserById(id){
 	});
 }
 
-export function getUserByNameAndPassword(name, password){
+export function getUserByEmailAndPassword(email, password){
 
 	return new Promise((resolve, reject) => {
 
-		User.findOne({name: name}).then(user => 
+		User.findOne({email: email}).then(user => 
 		{
 			
 			if(user){

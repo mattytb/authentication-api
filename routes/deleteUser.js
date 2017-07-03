@@ -4,7 +4,7 @@ module.exports = {
 
 	deleteUserByToken : (req, res) => {
 
-		getUserById(req.body.authorisedUserId).then(user => {
+		getUserById(req.body.userId).then(user => {
 
 			if(req.params.user_id == user._id || user.admin){
 

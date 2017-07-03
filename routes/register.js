@@ -1,14 +1,14 @@
 
 import { applyAuthToken } from '../modules/applyAuthToken';
-import { getUserByName, saveNewUser } from '../clients/userClient';
+import { getUserByEmail, saveNewUser } from '../clients/userClient';
 
 module.exports = {
 
   registerUser : (req, res) => {
 
-    getUserByName(req.body.name).then(user => {
+    getUserByEmail(req.body.email).then(user => {
 
-      res.status(409).json({ success: false, message: 'Sorry, already a user with this name' });
+      res.status(409).json({ success: false, message: 'Sorry, already a user with this email' });
 
     })
     .catch(err => {

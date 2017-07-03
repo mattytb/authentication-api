@@ -1,14 +1,15 @@
-import { verifyToken } from '../../clients/tokenClient';
+import { verifyUser } from '../../modules/verifyUser';
 
 module.exports = {
   
   isVerified : (req, res, next) => {
- 
-    var token = req.body.token || req.query.token || req.headers['x-access-token'];
 
-    if (token) {
+    let token = req.body.token || req.query.token || req.headers['x-access-token'];
+    let userId = req.body.userId || req.query.userId || req.headers['x-access-token'];
 
-      verifyToken(token)
+    if (userId && token) {
+
+      verifyUser(userId, token)
       
       .then(() => next())
       .catch(err => {

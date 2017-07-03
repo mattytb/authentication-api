@@ -4,9 +4,6 @@ import * as ApplyAuthToken from '../../../modules/applyAuthToken';
 import * as UserClient from '../../../clients/userClient';
 import * as Chai from 'chai';
 import Sinon from 'sinon';
-import SinonStubPromise from 'sinon-stub-promise';
-
-SinonStubPromise(Sinon);
 
 const Expect = Chai.expect,
 	req = {
@@ -38,14 +35,14 @@ describe('Unit::Route register', () => {
 
 	describe('When registering, it', () => {
 
-		let fetchUserByName,
+		let fetchUserByEmail,
 			applyTokenToUser,
 			newUser = {},
 			saveNewUser;
 	
 		beforeEach(() => {
-		 	fetchUserByName = sandbox.stub(UserClient, 'getUserByName').returnsPromise();
-		 	fetchUserByName.rejects();
+		 	fetchUserByEmail = sandbox.stub(UserClient, 'getUserByEmail').returnsPromise();
+		 	fetchUserByEmail.rejects();
 		 	saveNewUser = sandbox.stub(UserClient, 'saveNewUser').returnsPromise();
 		 	saveNewUser.resolves(newUser);
 			applyTokenToUser = sandbox.stub(ApplyAuthToken, 'applyAuthToken').returnsPromise();
@@ -57,9 +54,9 @@ describe('Unit::Route register', () => {
 		    sandbox.restore();
 		});
 
-		it('should attempt to find user by name', () => {
+		it('should attempt to find user by email', () => {
 
-			Expect(fetchUserByName).calledWith('name');
+			Expect(fetchUserByEmail).calledWith(req.body.email);
 
 		});
 
@@ -106,16 +103,16 @@ describe('Unit::Route register', () => {
 
 	});
 
-	describe('When failing to register because the users name already exists, it', () => {
+	describe('When failing to register because the users email already exists, it', () => {
 
-		let fetchUserByName,
+		let fetchUserByEmail,
 			applyTokenToUser,
 			newUser = {},
 			saveNewUser;
 	
 		beforeEach(() => {
-		 	fetchUserByName = sandbox.stub(UserClient, 'getUserByName').returnsPromise();
-		 	fetchUserByName.resolves();
+		 	fetchUserByEmail = sandbox.stub(UserClient, 'getUserByEmail').returnsPromise();
+		 	fetchUserByEmail.resolves();
 		 	saveNewUser = sandbox.stub(UserClient, 'saveNewUser').returnsPromise();
 			applyTokenToUser = sandbox.stub(ApplyAuthToken, 'applyAuthToken').returnsPromise();
 			registerUser(req, res);
@@ -127,13 +124,13 @@ describe('Unit::Route register', () => {
 
 		it('should attempt to find user by name', () => {
 
-			Expect(fetchUserByName).calledWith('name');
+			Expect(fetchUserByEmail).calledWith(req.body.email);
 
 		});
 
 		it('should not attempt save the new user', () => {
 
-			Expect(saveNewUser).not.calledWith('name', 'password');
+			Expect(saveNewUser).not.calledWith(req.body.name, req.body.password, req.body.email);
 
 		});
 
@@ -151,7 +148,7 @@ describe('Unit::Route register', () => {
 
 		it('should set message to the success message on the response', () => {
 			
-			Expect(res.body.message).to.equal('Sorry, already a user with this name');
+			Expect(res.body.message).to.equal('Sorry, already a user with this email');
 
 		});
 
@@ -164,15 +161,15 @@ describe('Unit::Route register', () => {
 
 	describe('When failing to register because saving of the user fails, it', () => {
 
-		let fetchUserByName,
+		let fetchUserByEmail,
 			applyTokenToUser,
 			saveNewUser,
 			newUser = {},
 			saveNewUserClientFailureMessage = "Failed to save new user";
 	
 		beforeEach(() => {
-		 	fetchUserByName = sandbox.stub(UserClient, 'getUserByName').returnsPromise();
-		 	fetchUserByName.rejects();
+		 	fetchUserByEmail = sandbox.stub(UserClient, 'getUserByEmail').returnsPromise();
+		 	fetchUserByEmail.rejects();
 		 	saveNewUser = sandbox.stub(UserClient, 'saveNewUser').returnsPromise();
 		 	saveNewUser.rejects(saveNewUserClientFailureMessage);
 			applyTokenToUser = sandbox.stub(ApplyAuthToken, 'applyAuthToken').returnsPromise();
@@ -183,15 +180,15 @@ describe('Unit::Route register', () => {
 		    sandbox.restore();
 		});
 
-		it('should attempt to find user by name', () => {
+		it('should attempt to find user by email', () => {
 
-			Expect(fetchUserByName).calledWith('name');
+			Expect(fetchUserByEmail).calledWith(req.body.email);
 
 		});
 
 		it('should attempt to save the new user', () => {
 
-			Expect(saveNewUser).calledWith('name', 'password');
+			Expect(saveNewUser).calledWith(req.body.name, req.body.password, req.body.email);
 
 		});
 
@@ -222,15 +219,15 @@ describe('Unit::Route register', () => {
 
 	describe('When failing to register because applying the auth token fails, it', () => {
 
-		let fetchUserByName,
+		let fetchUserByEmail,
 			applyTokenToUser,
 			newUser = {},
 			saveNewUser,
 			authTokenClientFailureMessage = "failed to authenticate";
 	
 		beforeEach(() => {
-		 	fetchUserByName = sandbox.stub(UserClient, 'getUserByName').returnsPromise();
-		 	fetchUserByName.rejects();
+		 	fetchUserByEmail = sandbox.stub(UserClient, 'getUserByEmail').returnsPromise();
+		 	fetchUserByEmail.rejects();
 		 	saveNewUser = sandbox.stub(UserClient, 'saveNewUser').returnsPromise();
 		 	saveNewUser.resolves(newUser);
 			applyTokenToUser = sandbox.stub(ApplyAuthToken, 'applyAuthToken').returnsPromise();
@@ -242,15 +239,15 @@ describe('Unit::Route register', () => {
 		    sandbox.restore();
 		});
 
-		it('should attempt to find user by name', () => {
+		it('should attempt to find user by email', () => {
 
-			Expect(fetchUserByName).calledWith('name');
+			Expect(fetchUserByEmail).calledWith(req.body.email);
 
 		});
 
 		it('should save the new user', () => {
 
-			Expect(saveNewUser).calledWith('name', 'password');
+			Expect(saveNewUser).calledWith(req.body.name, req.body.password, req.body.email);
 
 		});
 

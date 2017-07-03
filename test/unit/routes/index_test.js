@@ -1,10 +1,7 @@
 import * as Chai from 'chai';
 import Sinon from 'sinon';
-import SinonStubPromise from 'sinon-stub-promise';
 import * as UserClient from '../../../clients/userClient';
 import { getAllUsers } from '../../../routes/index';
-
-SinonStubPromise(Sinon);
 
 const Expect = Chai.expect,
 	req = {},

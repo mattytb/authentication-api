@@ -1,13 +1,7 @@
-import * as TokenClient from '../../../../clients/tokenClient';
+import * as verifyUser from '../../../../modules/verifyUser';
 import { isVerified } from '../../../../routes/validators/authenticationValidator';
 import * as Chai from 'chai';
 import Sinon from 'sinon';
-import SinonStubPromise from 'sinon-stub-promise';
-import SinonChai from 'sinon-chai';
-
-Chai.use(SinonChai);
-
-SinonStubPromise(Sinon);
 
 const clientFailedToVerifyMessage = 'Client failed to verify',
 		Expect = Chai.expect;
@@ -20,7 +14,7 @@ const clientFailedToVerifyMessage = 'Client failed to verify',
 	        	return this;
 	    	}
 	    },
-		verifyingToken,
+		verifyingUser,
 		result,
 		next;
 
@@ -30,14 +24,15 @@ describe('Unit::Route Validator authenticationValidator', () => {
 
 		const req = {
 				body:{
-					token:'Token'
+					token:'Token',
+					userId:123
 				}
 			};
 
 		beforeEach((done) => {
 
-			verifyingToken = sandbox.stub(TokenClient, 'verifyToken').returnsPromise();
-		 	verifyingToken.resolves();
+			verifyingUser = sandbox.stub(verifyUser, 'verifyUser').returnsPromise();
+		 	verifyingUser.resolves();
 
 			next = Sinon.spy();
 	 		isVerified(req, res, next);
@@ -48,8 +43,8 @@ describe('Unit::Route Validator authenticationValidator', () => {
 		    sandbox.restore();
 		});
 
-		it('should verify the token', () => {
-			Expect(verifyingToken).calledWith('Token');
+		it('should request to verify the user with userId and token', () => {
+			Expect(verifyingUser).calledWith(req.body.userId, req.body.token);
 		});
 
 		it('should call the next function on router', () => {
@@ -62,13 +57,14 @@ describe('Unit::Route Validator authenticationValidator', () => {
 
 		const req = {
 				body:{
-					token:'Token'
+					token:'Token',
+					userId:123
 				}
 			};
 
 		beforeEach((done) => {
-			verifyingToken = sandbox.stub(TokenClient, 'verifyToken').returnsPromise();
-		 	verifyingToken.rejects(clientFailedToVerifyMessage);
+			verifyingUser = sandbox.stub(verifyUser, 'verifyUser').returnsPromise();
+		 	verifyingUser.rejects(clientFailedToVerifyMessage);
 
 			next = Sinon.spy();
 	 		isVerified(req, res, next);
@@ -79,8 +75,8 @@ describe('Unit::Route Validator authenticationValidator', () => {
 		    sandbox.restore();
 		});
 
-		it('should attempt to verify the token', () => {
-			Expect(verifyingToken).calledWith('Token');
+		it('should attempt to verify the user with userId and token', () => {
+			Expect(verifyingUser).calledWith(req.body.userId, req.body.token);
 		});
 
 		it('should not call the next function on router', () => {
@@ -105,6 +101,7 @@ describe('Unit::Route Validator authenticationValidator', () => {
 	describe('When failing to verify because no token, it', () => {
 		const req = {
 				body:{
+					userId : 123
 				},
 				query:{},
 				headers:[]
@@ -113,7 +110,7 @@ describe('Unit::Route Validator authenticationValidator', () => {
 		
 		beforeEach((done) => {
 			next = Sinon.spy();
-			verifyingToken = sandbox.stub(TokenClient, 'verifyToken').returnsPromise();
+			verifyingUser = sandbox.stub(verifyUser, 'verifyUser').returnsPromise();
 			isVerified(req, res, next);
 			done();
 		
@@ -123,8 +120,53 @@ describe('Unit::Route Validator authenticationValidator', () => {
 		    sandbox.restore();
 		});
 
-		it('should not attempt to verify the token', () => {
-			Expect(verifyingToken).not.calledWith('token');
+		it('should not attempt to verify the user', () => {
+			Expect(verifyingUser).not.calledWith(req.body.userId, req.body.token);
+		});
+
+		it('should not call the next function on router', () => {
+			Expect(next.calledOnce).to.be.false;
+		});
+
+		it('should set the failed to find token message', () => {
+			Expect(res.body.message).to.equal('No token provided.');
+		});
+
+		it('should set the success value to false', () => {
+			Expect(res.body.success).to.be.false;
+		});
+
+		it('should have a response status of 500', (done) => {
+			Expect(res.statusValue).to.equal(500);
+			done();
+		});
+
+	});
+
+	describe('When failing to verify because no userId, it', () => {
+		const req = {
+				body:{
+					token : "token"
+				},
+				query:{},
+				headers:[]
+
+			};
+		
+		beforeEach((done) => {
+			next = Sinon.spy();
+			verifyingUser = sandbox.stub(verifyUser, 'verifyUser').returnsPromise();
+			isVerified(req, res, next);
+			done();
+		
+		});
+	
+		afterEach(() => {
+		    sandbox.restore();
+		});
+
+		it('should not attempt to verify the user', () => {
+			Expect(verifyingUser).not.calledWith(req.body.userId, req.body.token);
 		});
 
 		it('should not call the next function on router', () => {

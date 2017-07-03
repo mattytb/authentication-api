@@ -3,25 +3,22 @@ import * as ApplyAuthToken from '../../../modules/applyAuthToken';
 import * as UserClient from '../../../clients/userClient';
 import * as Chai from 'chai';
 import Sinon from 'sinon';
-import SinonStubPromise from 'sinon-stub-promise';
-
-SinonStubPromise(Sinon);
 
 const Expect = Chai.expect,
 	request = {
 		body:{
-			name:'name',
+			email:'matt@email.com',
 			password:'password'
 		}
 	},
 	req = request,
 	authenticatedToken = 'Token',
 	authenticatedUser = {
-		name:'name',
+		email:'matt@email.com',
 		password:'password',
 		token:authenticatedToken,
 		_id:123
-	}
+	};
 
 let sandbox = Sinon.sandbox.create(),
 	res = { 
@@ -41,7 +38,7 @@ describe('Unit::Route authenticate', () => {
 			promisedUser = {};
 	
 		beforeEach(() => {
-		 	fetchUser = sandbox.stub(UserClient, 'getUserByNameAndPassword').returnsPromise();
+		 	fetchUser = sandbox.stub(UserClient, 'getUserByEmailAndPassword').returnsPromise();
 		 	fetchUser.resolves(promisedUser);
 			applyTokenToUser = sandbox.stub(ApplyAuthToken, 'applyAuthToken').returnsPromise();
 			applyTokenToUser.resolves(authenticatedUser);
@@ -52,8 +49,8 @@ describe('Unit::Route authenticate', () => {
 		    sandbox.restore();
 		});
 
-		it('should get user by name and password', () => {
-			Expect(fetchUser).calledWith('name', 'password');
+		it('should get user by email and password', () => {
+			Expect(fetchUser).calledWith(req.body.email, req.body.password);
 		});
 
 		it('should apply the auth token to the user', () => {
@@ -99,7 +96,7 @@ describe('Unit::Route authenticate', () => {
 		let fetchUser;
 	
 		beforeEach(() => {
-		 	fetchUser = sandbox.stub(UserClient, 'getUserByNameAndPassword').returnsPromise();
+		 	fetchUser = sandbox.stub(UserClient, 'getUserByEmailAndPassword').returnsPromise();
 		 	fetchUser.rejects(rejectedUserClientMessage);
 		 	getAuthToken(req, res);
 		});
@@ -108,10 +105,11 @@ describe('Unit::Route authenticate', () => {
 		    sandbox.restore();
 		});
 
-		it('should attempt to get user by name and password', () => {
-			Expect(fetchUser).calledWith('name', 'password');
+		it('should attempt to get user by email and password', () => {
+			Expect(fetchUser).calledWith(req.body.email, req.body.password);
 		});
 
+  
 	  	it('should set the success value to false', () => {
 
 			Expect(res.body.success).to.be.false;
@@ -141,7 +139,7 @@ describe('Unit::Route authenticate', () => {
 	
 		beforeEach(() => {
 
-		 	fetchUser = sandbox.stub(UserClient, 'getUserByNameAndPassword').returnsPromise();
+		 	fetchUser = sandbox.stub(UserClient, 'getUserByEmailAndPassword').returnsPromise();
 		 	fetchUser.resolves(promisedUser);
 
 		 	applyTokenToUser = sandbox.stub(ApplyAuthToken, 'applyAuthToken').returnsPromise();
@@ -154,9 +152,9 @@ describe('Unit::Route authenticate', () => {
 		    sandbox.restore();
 		});
 
-		it('should get user by name and password', () => {
+		it('should get user by email and password', () => {
 
-			Expect(fetchUser).calledWith('name', 'password');
+			Expect(fetchUser).calledWith(req.body.email, req.body.password);
 		});
 
 		it('should attempt to apply the auth token to the user', () => {
