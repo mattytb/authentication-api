@@ -3,26 +3,18 @@ import bcrypt from 'bcryptjs';
 import {provideNewUser} from '../models/providers/newUserProvider';
 import {saveUser, getSaltRounds} from '../models/utils/userUtils';
 
-export function getUserByName(name){
-
-	return new Promise((resolve, reject) => {
-
-		User.findOne({name: name}).then(user => 
-		{
-			user ? resolve(user) : reject(new Error("no user found for name"))
-		})
-		.catch(err => reject(err));
-
-	});
-}
-
 export function getUserByEmail(email){
 
 	return new Promise((resolve, reject) => {
 
 		User.findOne({email: email}).then(user => 
 		{
-			user ? resolve(user) : reject(new Error("no user found for name"))
+			if(user){
+				resolve(user);
+			}
+			else {
+				reject(new Error("no user found for email"));
+			}
 		})
 		.catch(err => reject(err));
 
@@ -33,9 +25,14 @@ export function getUserById(id){
 
 	return new Promise((resolve, reject) => {
 
-		User.findOne({_id: id}).then(user => 
+		User.findById(id).then(user => 
 		{
-			user ? resolve(user) : reject(new Error('no user found for id'))
+			if(user){
+				resolve(user);
+			}
+			else {
+				reject(new Error("no user found for id"));
+			}
 		})
 		.catch(err => reject(err));
 
@@ -51,7 +48,12 @@ export function getUserByEmailAndPassword(email, password){
 			
 			if(user){
 				bcrypt.compare(password, user.password).then(res => {
-					res ? resolve(user) : reject(new Error("unable to find users with those credentials"));
+					if(res){
+						resolve(user);
+					}
+					else {
+						reject(new Error("unable to find users with those credentials"));
+					}
 				})
 				.catch( err => reject(err));
 			}

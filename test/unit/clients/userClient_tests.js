@@ -11,42 +11,7 @@ const Expect = Chai.expect;
 
 describe('Unit::userClient', () => {
 
-	describe('When getting user by name', () => {
-
-		it('it should request the user by name', () => {
-			Expect(gettingUserByName).calledWith({name:'matt'});
-		});
-
-		it('it should return the user', () => {
-			return result.then((data) =>{
-				Expect(data).to.equal(fetchedUser);
-			})
-		});
-
-		const name = "matt",
-			fetchedUser = {
-				'name':'matt',
-				'token':'token',
-				'_id' : 123
-			};
-
-		let gettingUserByName,
-			result,
-			sandbox = Sinon.sandbox.create();
-
-		beforeEach(() => {
-			
-			gettingUserByName = sandbox.stub(mongoose.Model, 'findOne').returnsPromise();
-			gettingUserByName.resolves(fetchedUser);
-			result = UserClient.getUserByName(name);
-		});
-
-		afterEach(function() {
-			sandbox.restore();
-		});
-
-	});
-
+	
 	describe('When getting user by email', () => {
 
 		it('it should request the user by email', () => {
@@ -87,7 +52,7 @@ describe('Unit::userClient', () => {
 	describe('When successfully getting user by id', () => {
 
 		it('it should request user by id', () => {
-			Expect(gettingUserById).calledWith({_id:id});
+			Expect(gettingUserById).calledWith(id);
 		});
 
 
@@ -110,7 +75,7 @@ describe('Unit::userClient', () => {
 
 		beforeEach(() => {
 			
-			gettingUserById = sandbox.stub(mongoose.Model, 'findOne').returnsPromise();
+			gettingUserById = sandbox.stub(mongoose.Model, 'findById').returnsPromise();
 			gettingUserById.resolves(fetchedUser);
 			result = UserClient.getUserById(id);
 		});
