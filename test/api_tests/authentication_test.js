@@ -9,7 +9,7 @@ let token,
 
 describe('Authentication', () => {
 
-  describe('Int::when a user registers, it', () => {
+  describe('Api::when a user registers, it', () => {
 
     it('should return the user a token when user supplies name, password and email', (done) => {
         server
@@ -54,7 +54,7 @@ describe('Authentication', () => {
     });
   });
 
-  describe('Int::when a users token has expired and he needs to re-authenticate, it', () => {
+  describe('Api::when a users token has expired and he needs to re-authenticate, it', () => {
 
     it('should allow the user to re-authenticate with their email and password', (done) => {
         server
@@ -100,7 +100,7 @@ describe('Authentication', () => {
 
   });
 
-  describe('Int::when a user tries to authenticate and does not provide full credentials', () => {
+  describe('Api::when a user tries to authenticate and does not provide full credentials', () => {
 
     it('should not supply a token', (done) => {
         server
@@ -117,7 +117,7 @@ describe('Authentication', () => {
 
   });
 
-  describe('Int::when a user tries to access data that requires authentication without a token', () => {
+  describe('Api::when a user tries to access data that requires authentication without a token', () => {
 
     it('should not allow access to the data', (done) => {
         server
@@ -134,7 +134,7 @@ describe('Authentication', () => {
 
   });
 
-  describe('Int::when a user deletes himself', () => {
+  describe('Api::when a user deletes himself', () => {
 
     it('should return success message including the users deleted id', (done) => {
         server

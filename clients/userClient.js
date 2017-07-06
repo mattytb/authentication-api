@@ -17,7 +17,6 @@ export function getUserByEmail(email){
 			}
 		})
 		.catch(err => reject(err));
-
 	});
 }
 
@@ -47,18 +46,18 @@ export function getUserByEmailAndPassword(email, password){
 		{
 			
 			if(user){
-				bcrypt.compare(password, user.password).then(res => {
-					if(res){
+				bcrypt.compare(password, user.password).then(result => {
+					if(result){
 						resolve(user);
 					}
 					else {
-						reject(new Error("unable to find users with those credentials"));
+						reject(new Error("unable to find user with those credentials"));
 					}
 				})
-				.catch( err => reject(err));
+				.catch(err => reject(err));
 			}
 			else {
-				reject(new Error("unable to find users with those credentials"));
+				reject(new Error("unable to find user with those credentials"));
 			}	
 
 		})
@@ -78,6 +77,10 @@ export function saveTokenToUser(userId, token){
 		})
 		.catch( err =>	reject(err));
 	});
+}
+
+export function saveThirdPartyUser(username, email, admin){
+
 }
 
 export function saveNewUser(username, password, email, admin){

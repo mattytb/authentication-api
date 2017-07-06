@@ -1,32 +1,22 @@
-
-import {applyAuthToken} from '../modules/applyAuthToken';
-import { getUserByEmailAndPassword } from '../clients/userClient';
+import {authenticateUser} from '../services/authenticationService';
 
 module.exports = {
 
 	getAuthToken : (req, res) => {
 
-		getUserByEmailAndPassword(req.body.email, req.body.password).then(user => {
+		authenticateUser(req.body.email, req.body.password).then(user => {
 
-			applyAuthToken(user).then(user => {
-
-				res.status(200).json({
+			const result = {
 		          success: true,
 		          message: 'Enjoy your token',
 		          token: user.token,
 		          userId: user._id
-				});
+			}
 
-			}).catch(err => {
-
-				res.status(500).json({ success: false, message: err });
-
-			});
+			res.status(200).json(result);
 
 		}).catch(err => {
-
-			res.status(401).json({ success: false, message: err });
-			
+			res.status(401).json({ success: false, message: err.message });
 		});
 	}
 }

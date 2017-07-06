@@ -1,6 +1,5 @@
+import * as AuthenticationService from '../../../services/authenticationService';
 import { getAuthToken } from '../../../routes/authenticate';
-import * as ApplyAuthToken from '../../../modules/applyAuthToken';
-import * as UserClient from '../../../clients/userClient';
 import * as Chai from 'chai';
 import Sinon from 'sinon';
 
@@ -31,17 +30,38 @@ let sandbox = Sinon.sandbox.create(),
 
 describe('Unit::Route authenticate', () => {
 
-	describe('When authenticating, it', () => {
+	describe('When authenticating', () => {
 
-		let fetchUser,
-			applyTokenToUser,
-			promisedUser = {};
+		it('it should call the authentication service to authenticate user with their email and password', () => {
+			Expect(authenticatingUser).calledWith(req.body.email, req.body.password);
+		});
+
+		it('it should have set the user\'s id on the response', () => {
+			Expect(res.body.userId).to.equal(authenticatedUser._id);
+		});
+
+	  	it('it should have set the token on the response', () => {
+			Expect(res.body.token).to.equal(authenticatedUser.token);
+		});
+
+		it('it should set success to true on the response', () => {
+			Expect(res.body.success).to.be.true;
+		});
+
+		it('it should set message to the success message on the response', () => {
+			Expect(res.body.message).to.equal('Enjoy your token');
+		});
+
+		it('it should have a response status of 200', (done) => {
+			Expect(res.statusValue).to.equal(200);
+			done();
+		});
+
+		let authenticatingUser;
 	
 		beforeEach(() => {
-		 	fetchUser = sandbox.stub(UserClient, 'getUserByEmailAndPassword').returnsPromise();
-		 	fetchUser.resolves(promisedUser);
-			applyTokenToUser = sandbox.stub(ApplyAuthToken, 'applyAuthToken').returnsPromise();
-			applyTokenToUser.resolves(authenticatedUser);
+		 	authenticatingUser = sandbox.stub(AuthenticationService, 'authenticateUser').returnsPromise();
+		 	authenticatingUser.resolves(authenticatedUser);
 			getAuthToken(req, res);
 		});
 		
@@ -49,102 +69,34 @@ describe('Unit::Route authenticate', () => {
 		    sandbox.restore();
 		});
 
-		it('should get user by email and password', () => {
-			Expect(fetchUser).calledWith(req.body.email, req.body.password);
-		});
-
-		it('should apply the auth token to the user', () => {
-			Expect(applyTokenToUser).calledWith(promisedUser);
-		});
-
-		it('should have set the user\'s id on the response', () => {
-
-			Expect(res.body.userId).to.equal(authenticatedUser._id);
-
-		});
-
-	  	it('should have set the token on the response', () => {
-
-			Expect(res.body.token).to.equal(authenticatedUser.token);
-
-		});
-
-		it('should set success to true on the response', () => {
-
-			Expect(res.body.success).to.be.true;
-
-		});
-
-		it('should set message to the success message on the response', () => {
-
-			Expect(res.body.message).to.equal('Enjoy your token');
-
-		});
-
-		it('should have a response status of 200', (done) => {
-			Expect(res.statusValue).to.equal(200);
-			done();
-
-		});
-
 	});
 
 	describe('When not authenticating because user is not found, it', () => {
-		
-		const rejectedUserClientMessage = 'rejected message from user client';
 
-		let fetchUser;
-	
-		beforeEach(() => {
-		 	fetchUser = sandbox.stub(UserClient, 'getUserByEmailAndPassword').returnsPromise();
-		 	fetchUser.rejects(rejectedUserClientMessage);
-		 	getAuthToken(req, res);
-		});
-		
-		afterEach(() => {
-		    sandbox.restore();
+		it('it should attempt to call the authentication service to authenticate user with their email and password', () => {
+			Expect(authenticatingUser).calledWith(req.body.email, req.body.password);
 		});
 
-		it('should attempt to get user by email and password', () => {
-			Expect(fetchUser).calledWith(req.body.email, req.body.password);
-		});
-
-  
-	  	it('should set the success value to false', () => {
-
+  		it('should set the success value to false', () => {
 			Expect(res.body.success).to.be.false;
-
 		});
 
 		it('should set message value to the error message', () => {
-
 			Expect(res.body.message).to.equal(rejectedUserClientMessage);
-
 		});
 
 		it('should have a response status of 401', (done) => {
 			Expect(res.statusValue).to.equal(401);
 			done();
 		});
+		
+		const rejectedUserClientMessage = 'rejected message from user client';
 
-	});
-
-	describe('When not authenticating because applying auth token fails, it', () => {
-
-		const rejectedApplyAuthTokenMessage = 'rejected message from apply user to token module',
-			promisedUser = {};
-
-		let fetchUser,
-		applyTokenToUser;
+		let authenticatingUser;
 	
 		beforeEach(() => {
-
-		 	fetchUser = sandbox.stub(UserClient, 'getUserByEmailAndPassword').returnsPromise();
-		 	fetchUser.resolves(promisedUser);
-
-		 	applyTokenToUser = sandbox.stub(ApplyAuthToken, 'applyAuthToken').returnsPromise();
-			applyTokenToUser.rejects(rejectedApplyAuthTokenMessage);
-
+		 	authenticatingUser = sandbox.stub(AuthenticationService, 'authenticateUser').returnsPromise();
+		 	authenticatingUser.rejects(new Error(rejectedUserClientMessage));
 		 	getAuthToken(req, res);
 		});
 		
@@ -152,34 +104,5 @@ describe('Unit::Route authenticate', () => {
 		    sandbox.restore();
 		});
 
-		it('should get user by email and password', () => {
-
-			Expect(fetchUser).calledWith(req.body.email, req.body.password);
-		});
-
-		it('should attempt to apply the auth token to the user', () => {
-
-			Expect(applyTokenToUser).calledWith(promisedUser);
-
-		});
-
-	  	it('should set success to false', () => {
-
-			Expect(res.body.success).to.be.false;
-
-		});
-
-		it('should set message to the error message from the apply auth token module', () => {
-
-			Expect(res.body.message).to.equal(rejectedApplyAuthTokenMessage);
-
-		});
-
-		it('should have a response status of 500', (done) => {
-			Expect(res.statusValue).to.equal(500);
-			done();
-		});
-
 	});
-
 });
