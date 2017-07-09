@@ -15,7 +15,7 @@ describe('Unit::facebookClient', () => {
 
 		it('it should return the facebook user', () => {
 			return result.then((user) => {
-				Expect(user).to.equal(facebookUser);
+				Expect(user).to.equal(facebookUser.data);
 			})
 		});
 
@@ -23,14 +23,15 @@ describe('Unit::facebookClient', () => {
 			facebookGraphUri = "https://graph.facebook.com/me",
 			parameters = "email,name,picture",
 			facebookUser = {
-				'name':'matt',
-				'email':'matt@email.com',
-				'picture':
-					{ 
+				data : {
+					'name':'matt',
+					'email':'matt@email.com',
+					'picture':{ 
 						data: {
 							url:"image.src"
 						}
 					}
+				}
 			};
 
 			let gettingFacebookUser,

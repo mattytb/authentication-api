@@ -56,7 +56,7 @@ describe('Unit::Route facebookAuthenticate', () => {
 			name:'name',
 			password:'password',
 			email:'name@email.com',
-			image:'image.jpg'
+			image:'image.jpg',
 			token:'new token',
 			_id:"123"
 		}
