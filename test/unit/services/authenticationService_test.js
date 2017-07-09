@@ -2,6 +2,7 @@ import * as Chai from 'chai';
 import Sinon from 'sinon';
 import * as Token from '../../../clients/tokenClient';
 import * as UserClient from '../../../clients/userClient';
+import * as FacebookClient from '../../../clients/facebookClient';
 import * as AuthTokenService from '../../../services/authTokenService';
 import * as AuthenticationService from '../../../services/authenticationService';
 
@@ -123,6 +124,143 @@ describe('Unit::Service authentication service', () => {
 		});
 
 	});
+
+	describe("When authenticating a new Facebook user", () => {
+
+		it("it should get the Facebook user with the access token supplied", () => {
+			Expect(gettingFacebookUser).calledWith(accessToken);
+		});
+
+		it("it should enquire to see if the facebook user already exists in the database", () => {
+			Expect(checkingForUser).calledWith(facebookUser.email);
+		});
+
+		it("it should request the new facebook user be saved", () => {
+			Expect(savingNewUser).calledWith(facebookUser.name, facebookUser.email, facebookUser.picture.data.url);
+		});
+
+		it('it should apply an auth token to the newly created user', () => {
+			Expect(applyingTokenToUser).calledWith(savedUser);
+		});
+
+		it("it should return the new authenticated user", () => {
+			return result.then((user) => {
+				Expect(user).to.equal(authenticatedUser);
+			});
+		});
+
+		const accessToken = "accessToken";
+
+		let gettingFacebookUser,
+			checkingForUser,
+			savingNewUser,
+			applyingTokenToUser,
+			facebookUser = {
+				'name':'matt',
+				'email':'matt@email.com',
+				'picture':
+					{ 
+						data: {
+							url:"image.src"
+						}
+					}
+			},
+			savedUser = {
+				name:'facebook user',
+				email:'facebook@user.com',
+				_id:"123"
+			},
+			authenticatedUser = {
+				name:'facebook user',
+				email:'facebook@user.com',
+				_id:"123",
+				token:'token'
+			},
+			result,
+			sandbox = Sinon.sandbox.create();
+
+		beforeEach(() => {
+
+			gettingFacebookUser = sandbox.stub(FacebookClient, 'getFacebookUser').returnsPromise();
+			gettingFacebookUser.resolves(facebookUser);
+			checkingForUser = sandbox.stub(UserClient, 'getUserByEmail').returnsPromise();
+			checkingForUser.rejects();
+			savingNewUser = sandbox.stub(UserClient, 'saveThirdPartyUser').returnsPromise();
+			savingNewUser.resolves(savedUser);
+			applyingTokenToUser = sandbox.stub(AuthTokenService, 'applyAuthToken').returnsPromise();
+			applyingTokenToUser.resolves(authenticatedUser);
+
+			result = AuthenticationService.authenticateFacebookUser(accessToken);
+		});
+
+		afterEach(() => {
+			sandbox.restore();
+		});
+
+	});
+
+	describe("When authenticating a already registered Facebook user", () => {
+
+		it("it should get the Facebook user with the access token supplied", () => {
+			Expect(gettingFacebookUser).calledWith(accessToken);
+		});
+
+		it("it should enquire to see if the facebook user already exists in the database", () => {
+			Expect(checkingForUser).calledWith(facebookUser.email);
+		});
+
+		it("it should request authentication the user found", () => {
+			Expect(applyingTokenToUser).calledWith(user);
+		});
+
+		it("it should return the user with a new token", () => {
+			return result.then((user) => {
+				Expect(user).to.equal(authenticatedUser);
+			});
+		});
+
+		const accessToken = "accessToken";
+
+		let gettingFacebookUser,
+			checkingForUser,
+			applyingTokenToUser,
+			facebookUser = {
+				name:'facebook user',
+				email:'facebook@user.com'
+			},
+			user = {
+				name:'facebook user',
+				email:'facebook@user.com',
+				_id:"123",
+				token:'token'
+			},
+			authenticatedUser = {
+				name:'facebook user',
+				email:'facebook@user.com',
+				_id:"123",
+				token:'new token'
+			},
+			result,
+			sandbox = Sinon.sandbox.create();
+
+		beforeEach(() => {
+
+			gettingFacebookUser = sandbox.stub(FacebookClient, 'getFacebookUser').returnsPromise();
+			gettingFacebookUser.resolves(facebookUser);
+			checkingForUser = sandbox.stub(UserClient, 'getUserByEmail').returnsPromise();
+			checkingForUser.resolves(user);
+			applyingTokenToUser = sandbox.stub(AuthTokenService, 'applyAuthToken').returnsPromise();
+			applyingTokenToUser.resolves(authenticatedUser);
+
+			result = AuthenticationService.authenticateFacebookUser(accessToken);
+		});
+
+		afterEach(() => {
+			sandbox.restore();
+		});
+
+	});
+
 });
 
 

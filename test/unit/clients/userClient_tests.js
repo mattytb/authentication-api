@@ -240,6 +240,57 @@ describe('Unit::userClient', () => {
 
 	});
 
+	describe('When successfully saving a third party user', () => {
+
+		it('it should request a new user providing username, email and admin', () => {
+			Expect(providingUser).calledWith(username, email, admin);
+		});
+
+		it('it should request the provided user be saved', () => {
+			Expect(savingUser).calledWith(providedUser);
+		}); 
+
+		it('it should return the saved user', () => {
+			return result.then((data) => {
+				Expect(data).to.equal(savedUser);
+			});
+		});
+
+		const username = 'matt facebook',
+			email = 'email@facebook.com',
+			admin = false,
+			providedUser = {
+				'name':'matt facebook',
+				'email':'email@facebook.com',
+				'admin':false
+			},
+			savedUser = {
+				'name':'matt facebook',
+				'email':'email@facebook.com',
+				'admin':false,
+			},
+			providedSaltRounds = 2;
+
+		let providingUser,
+			providingSaltRounds,
+			hashingPassword,
+			savingUser,
+			result,
+			sandbox = Sinon.sandbox.create();
+
+		beforeEach(() => {
+			providingUser = sandbox.stub(newUserProvider, 'provideNewUser').callsFake(() => {return providedUser});
+			savingUser = sandbox.stub(userUtils, 'saveUser').returnsPromise();
+			savingUser.resolves(savedUser);
+			result = UserClient.saveThirdPartyUser(username, email, admin);
+		});
+
+		afterEach(function() {
+			sandbox.restore();
+		});
+
+	});
+
 
 	describe('When successfully getting users', () => {
 

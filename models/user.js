@@ -16,8 +16,12 @@ let userSchema = mongoose.Schema({
     admin: {
         type:Boolean
     },
-    created: { type: Date},
-    token: String
+    created: { 
+        type: Date,
+        default: Date.now
+    },
+    token: String,
+    image: String
 });
 
 module.exports = mongoose.model('User', userSchema);

@@ -79,8 +79,21 @@ export function saveTokenToUser(userId, token){
 	});
 }
 
-export function saveThirdPartyUser(username, email, admin){
+export function saveThirdPartyUser(name, email, image, admin){
 
+	console.log(image);
+	console.log(admin);
+
+	return new Promise((resolve, reject) => {
+
+		let newUser = provideNewUser(name, email, image, admin);
+
+		saveUser(newUser)
+	    	.then(user => resolve(user))
+	    	.catch(err => reject(err)
+	    );
+
+    });
 }
 
 export function saveNewUser(username, password, email, admin){

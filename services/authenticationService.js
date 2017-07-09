@@ -1,4 +1,5 @@
-import { saveTokenToUser, saveNewUser, getUserByEmail, getUserByEmailAndPassword} from '../clients/userClient';
+import { saveTokenToUser, saveNewUser, getUserByEmail, getUserByEmailAndPassword, saveThirdPartyUser } from '../clients/userClient';
+import { getFacebookUser } from '../clients/facebookClient';
 import {applyAuthToken } from './authTokenService';
 
 export function authenticateNewUser(name, password, email){
@@ -29,6 +30,35 @@ export function authenticateUser(email, password){
 				resolve(user);
 			})
 			.catch(err => reject(err));
+		})
+		.catch(err => reject(err));
+	});
+}
+
+export function authenticateFacebookUser(accessToken){
+
+	return new Promise((resolve, reject) => {
+
+		getFacebookUser(accessToken).then(user => {
+
+			getUserByEmail(user.email).then(user => {
+
+				applyAuthToken(user).then(user => {
+					resolve(user);
+		        })
+		        
+		        .catch(err => reject(err));
+			})
+			.catch(err => {
+
+				saveThirdPartyUser(user.name, user.email, user.picture.data.url).then(newUser => {
+					applyAuthToken(newUser).then(user => {
+						resolve(user);
+			        })
+			        .catch(err => reject(err));
+		    	})
+	    		.catch(err => reject(err));
+			});
 		})
 		.catch(err => reject(err));
 	});
