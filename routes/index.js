@@ -7,6 +7,8 @@ module.exports = {
 
 		getUsers().then(users => {
 
+			users = users.map((user) => { return {name:user.name, id:user.id, image:user.image}; });
+
 			res.status(200).json(users);
 
 		}).catch(err => {

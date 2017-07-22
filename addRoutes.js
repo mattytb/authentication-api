@@ -1,4 +1,3 @@
-
 import Index from './routes/index';
 import Authenticate from './routes/authenticate';
 import Register from './routes/register';
@@ -10,12 +9,12 @@ import { hasNamePasswordAndEmail } from './routes/validators/namePasswordAndEmai
 import { hasAccessToken } from './routes/validators/accessTokenValidator';
 
 function addRoutes(router){
-
 	router.get('/users', isVerified, Index.getAllUsers);  
 	router.post('/users', hasNamePasswordAndEmail,  Register.registerUser);
 	router.delete('/users/:user_id', isVerified, DeleteUser.deleteUserByToken);
 	router.post('/authenticate', hasEmailAndPassword, Authenticate.getAuthToken);
-	router.post('/authenticate-facebook', hasAccessToken, facebookAuthenticate.authenticate)
+	router.post('/authenticate-facebook', hasAccessToken, facebookAuthenticate.authenticate);
+	router.post('/authenticationStatus', isVerified, Authenticate.getAuthStatus);
 } 
 
 module.exports = addRoutes;

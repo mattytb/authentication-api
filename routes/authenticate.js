@@ -1,4 +1,5 @@
-import {authenticateUser} from '../services/authenticationService';
+import {authenticateUser } from '../services/authenticationService';
+import { verifyUser } from '../modules/verifyUser';
 
 module.exports = {
 
@@ -15,9 +16,15 @@ module.exports = {
 
 			res.status(200).json(result);
 
-		}).catch(err => {
+		})
+		.catch(err => {
 			res.status(401).json({ success: false, message: err.message });
 		});
+	},
+
+	getAuthStatus : (req, res) => {
+
+		res.status(200).json({success : true});
 	}
 }
 

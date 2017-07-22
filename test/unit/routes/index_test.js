@@ -24,9 +24,17 @@ describe('Unit::Route index', () => {
 			promisedUsers = [
 				{
 					name:"Matt",
+					image:'mattsimage',
+					id:'mattsid',
+					email:'matts@email.com',
+					token:'token'
 				},
 				{
-					name:"Marta"
+					name:"Marta",
+					image:"martasimage",
+					id:"martasid",
+					email:'marta@email.com',
+					token:'token'
 				}
 			];
 	
@@ -40,9 +48,29 @@ describe('Unit::Route index', () => {
 		    sandbox.restore();
 		});
 
-		it('should return all users found', () => {
+		it('should return all users names found', () => {
 			Expect(res.body[0].name).to.equal("Matt");
 			Expect(res.body[1].name).to.equal("Marta");
+		});
+
+		it('should return all users names found', () => {
+			Expect(res.body[0].image).to.equal("mattsimage");
+			Expect(res.body[1].image).to.equal("martasimage");
+		});
+
+		it('should return all users ids found', () => {
+			Expect(res.body[0].id).to.equal("mattsid");
+			Expect(res.body[1].id).to.equal("martasid");
+		});
+
+		it('should not return the users email', () => {
+			Expect(res.body[0].email).to.not.exist;
+			Expect(res.body[1].email).to.not.exist;
+		});
+
+		it('should not return the users token', () => {
+			Expect(res.body[0].token).to.not.exist;
+			Expect(res.body[1].token).to.not.exist;
 		});
 
 		it('should have a response status of 200', (done) => {

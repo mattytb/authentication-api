@@ -1,5 +1,6 @@
 import * as AuthenticationService from '../../../services/authenticationService';
-import { getAuthToken } from '../../../routes/authenticate';
+import { getAuthToken, getAuthStatus } from '../../../routes/authenticate';
+import * as VerifyUser from '../../../modules/verifyUser';
 import * as Chai from 'chai';
 import Sinon from 'sinon';
 
@@ -30,7 +31,7 @@ let sandbox = Sinon.sandbox.create(),
 
 describe('Unit::Route authenticate', () => {
 
-	describe('When authenticating', () => {
+	describe('When re-authenticating a user', () => {
 
 		it('it should call the authentication service to authenticate user with their email and password', () => {
 			Expect(authenticatingUser).calledWith(req.body.email, req.body.password);
@@ -71,7 +72,7 @@ describe('Unit::Route authenticate', () => {
 
 	});
 
-	describe('When not authenticating because user is not found, it', () => {
+	describe('When not re-authenticating because user is not found, it', () => {
 
 		it('it should attempt to call the authentication service to authenticate user with their email and password', () => {
 			Expect(authenticatingUser).calledWith(req.body.email, req.body.password);
@@ -98,6 +99,27 @@ describe('Unit::Route authenticate', () => {
 		 	authenticatingUser = sandbox.stub(AuthenticationService, 'authenticateUser').returnsPromise();
 		 	authenticatingUser.rejects(new Error(rejectedUserClientMessage));
 		 	getAuthToken(req, res);
+		});
+		
+		afterEach(() => {
+		    sandbox.restore();
+		});
+
+	});
+
+	describe('When checking the status of authenticated user', () => {
+
+		it('it set the success value on the response to true', () => {
+			Expect(res.body.success).to.equal(true);
+		});
+
+		it('it should have a response status of 200', (done) => {
+			Expect(res.statusValue).to.equal(200);
+			done();
+		});
+	
+		beforeEach(() => {
+		 	getAuthStatus(req, res);
 		});
 		
 		afterEach(() => {

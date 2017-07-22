@@ -2,7 +2,7 @@ import {expect} from 'chai';
 import SuperTest from 'supertest';
 import Should from 'should';
 
-const server = SuperTest.agent("http://localhost:8080");
+const server = SuperTest.agent("http://localhost:75");
 
 let token,
     userId;
@@ -163,5 +163,5 @@ describe('Authentication', () => {
     });
 
   });
-
+  
 });

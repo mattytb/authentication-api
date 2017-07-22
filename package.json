@@ -5,12 +5,14 @@
     "axios": "^0.16.2",
     "bcryptjs": "^2.4.3",
     "body-parser": "^1.17.1",
+    "cors": "^2.8.4",
     "express": "^4.15.2",
     "jsonwebtoken": "^7.3.0",
     "latest-version": "^3.1.0",
     "mongoose": "^4.8.6",
     "morgan": "^1.8.1",
-    "node-fetch": "^1.6.3"
+    "node-fetch": "^1.6.3",
+    "nodemon": "^1.11.0"
   },
   "devDependencies": {
     "babel-cli": "^6.23.0",
