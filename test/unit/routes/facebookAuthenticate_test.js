@@ -1,7 +1,7 @@
 import * as Chai from 'chai';
 import Sinon from 'sinon';
-import * as AuthenticationService from '../../../services/authenticationService';
-import { authenticate } from '../../../routes/facebookAuthenticate';
+import * as AuthenticationService from '../../../lib/services/authenticationService';
+import { authenticate } from '../../../lib/routes/facebookAuthenticate';
 
 const Expect = Chai.expect;
 

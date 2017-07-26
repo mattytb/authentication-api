@@ -1,6 +1,6 @@
-import * as UserClient from '../../../clients/userClient';
-import * as TokenClient from '../../../clients/tokenClient';
-import { verifyUser } from '../../../modules/verifyUser';
+import * as UserClient from '../../../lib/clients/userClient';
+import * as TokenClient from '../../../lib/clients/tokenClient';
+import { verifyUser } from '../../../lib/modules/verifyUser';
 import Sinon from 'sinon';
 import * as Chai from 'chai';
 

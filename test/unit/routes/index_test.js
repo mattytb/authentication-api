@@ -1,7 +1,7 @@
 import * as Chai from 'chai';
 import Sinon from 'sinon';
-import * as UserClient from '../../../clients/userClient';
-import { getAllUsers } from '../../../routes/index';
+import * as UserClient from '../../../lib/clients/userClient';
+import { getAllUsers } from '../../../lib/routes/index';
 
 const Expect = Chai.expect,
 	req = {},

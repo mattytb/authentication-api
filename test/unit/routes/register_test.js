@@ -1,5 +1,5 @@
-import { registerUser } from '../../../routes/register';
-import * as AuthenticationService from '../../../services/authenticationService';
+import { registerUser } from '../../../lib/routes/register';
+import * as AuthenticationService from '../../../lib/services/authenticationService';
 import * as Chai from 'chai';
 import Sinon from 'sinon';
 

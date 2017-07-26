@@ -1,7 +1,7 @@
-import { deleteUserByToken } from '../../../routes/deleteUser';
+import { deleteUserByToken } from '../../../lib/routes/deleteUser';
 import * as Chai from 'chai';
 import Sinon from 'sinon';
-import * as UserClient from '../../../clients/userClient';
+import * as UserClient from '../../../lib/clients/userClient';
 
 const Expect = Chai.expect,
 	deletingUserFailureMessage = "failed to delete user",

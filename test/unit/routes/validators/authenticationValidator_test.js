@@ -1,5 +1,5 @@
-import * as verifyUser from '../../../../modules/verifyUser';
-import { isVerified } from '../../../../routes/validators/authenticationValidator';
+import * as verifyUser from '../../../../lib/modules/verifyUser';
+import { isVerified } from '../../../../lib/routes/validators/authenticationValidator';
 import * as Chai from 'chai';
 import Sinon from 'sinon';
 

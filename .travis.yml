@@ -10,4 +10,6 @@ after_success: 'nyc _mocha -g ^Unit:: --compilers js:babel-core/register --recur
   && nyc report --reporter=text-lcov | coveralls'
 before_install:
 - openssl aes-256-cbc -K $encrypted_0edd0fc670eb_key -iv $encrypted_0edd0fc670eb_iv
+  -in config.js.enc -out lib/config.js -d
+- openssl aes-256-cbc -K $encrypted_0edd0fc670eb_key -iv $encrypted_0edd0fc670eb_iv
   -in config.js.enc -out config.js -d

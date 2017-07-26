@@ -1,10 +1,10 @@
 import * as Chai from 'chai';
 import Sinon from 'sinon';
-import * as Token from '../../../clients/tokenClient';
-import * as UserClient from '../../../clients/userClient';
-import * as FacebookClient from '../../../clients/facebookClient';
-import * as AuthTokenService from '../../../services/authTokenService';
-import * as AuthenticationService from '../../../services/authenticationService';
+import * as Token from '../../../lib/clients/tokenClient';
+import * as UserClient from '../../../lib/clients/userClient';
+import * as FacebookClient from '../../../lib/clients/facebookClient';
+import * as AuthTokenService from '../../../lib/services/authTokenService';
+import * as AuthenticationService from '../../../lib/services/authenticationService';
 
 const Expect = Chai.expect;
 

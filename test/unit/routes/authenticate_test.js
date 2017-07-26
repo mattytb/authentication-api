@@ -1,6 +1,6 @@
-import * as AuthenticationService from '../../../services/authenticationService';
-import { getAuthToken, getAuthStatus } from '../../../routes/authenticate';
-import * as VerifyUser from '../../../modules/verifyUser';
+import * as AuthenticationService from '../../../lib/services/authenticationService';
+import { getAuthToken, getAuthStatus } from '../../../lib/routes/authenticate';
+import * as VerifyUser from '../../../lib/modules/verifyUser';
 import * as Chai from 'chai';
 import Sinon from 'sinon';
 

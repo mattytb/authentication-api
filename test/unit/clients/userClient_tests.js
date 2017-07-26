@@ -1,11 +1,11 @@
 import * as Chai from 'chai';
 import Sinon from 'sinon';
-import * as UserClient from '../../../clients/userClient';
+import * as UserClient from '../../../lib/clients/userClient';
 import bcrypt from 'bcryptjs';
-import * as User from '../../../models/user';
+import * as User from '../../../lib/models/user';
 import mongoose from 'mongoose';
-import * as newUserProvider from '../../../models/providers/newUserProvider';
-import * as userUtils from '../../../models/utils/userUtils';
+import * as newUserProvider from '../../../lib/models/providers/newUserProvider';
+import * as userUtils from '../../../lib/models/utils/userUtils';
 
 const Expect = Chai.expect;
 

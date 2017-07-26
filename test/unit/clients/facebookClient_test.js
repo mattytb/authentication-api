@@ -1,7 +1,7 @@
 import Axios from 'axios';
 import * as Chai from 'chai';
 import Sinon from 'sinon';
-import * as FacebookClient from '../../../clients/facebookClient';
+import * as FacebookClient from '../../../lib/clients/facebookClient';
 
 const Expect = Chai.expect;
 

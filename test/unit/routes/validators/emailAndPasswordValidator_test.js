@@ -1,4 +1,4 @@
-import { hasEmailAndPassword } from '../../../../routes/validators/emailAndPasswordValidator';
+import { hasEmailAndPassword } from '../../../../lib/routes/validators/emailAndPasswordValidator';
 import Sinon from 'sinon';
 import * as Chai from 'chai';
 

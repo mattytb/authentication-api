@@ -1,4 +1,4 @@
-import { hasAccessToken } from '../../../../routes/validators/accessTokenValidator';
+import { hasAccessToken } from '../../../../lib/routes/validators/accessTokenValidator';
 import Sinon from 'sinon';
 import * as Chai from 'chai';
 
