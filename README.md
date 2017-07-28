@@ -4,3 +4,5 @@
 [![Code Climate](https://codeclimate.com/github/esharmony/authentication-api/badges/gpa.svg)](https://codeclimate.com/github/esharmony/authentication-api)
 
 Information about this project can be found here : http://esharmony.co.uk/authentication-api/
+
+The Web Client which uses this API can be found here: https://stormy-anchorage-48490.herokuapp.com - The first request maybe slow because it is running on free heroku dynos at the moment https://devcenter.heroku.com/articles/free-dyno-hours and they will sleep after 30 mins of inactivity
