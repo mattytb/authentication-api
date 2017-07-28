@@ -199,7 +199,7 @@ describe('Unit::Service authentication service', () => {
 
 	});
 
-	describe("When authenticating a already registered Facebook user", () => {
+	describe("When authenticating a already registered Facebook user and there auth token is still valid", () => {
 
 		it("it should get the Facebook user with the access token supplied", () => {
 			Expect(gettingFacebookUser).calledWith(accessToken);
@@ -209,13 +209,17 @@ describe('Unit::Service authentication service', () => {
 			Expect(checkingForUser).calledWith(facebookUser.email);
 		});
 
-		it("it should request authentication the user found", () => {
-			Expect(applyingTokenToUser).calledWith(user);
+		it("it should check the validaty of the authentication token", () => {
+				Expect(verifyingAuthToken).calledWith(user.token);
+		})
+
+		it("it should not request the re authentication of the user found", () => {
+			//Expect(applyingTokenToUser).not.calledWith(user);
 		});
 
 		it("it should return the user with a new token", () => {
 			return result.then((user) => {
-				Expect(user).to.equal(authenticatedUser);
+				Expect(user).to.equal(user);
 			});
 		});
 
@@ -224,6 +228,7 @@ describe('Unit::Service authentication service', () => {
 		let gettingFacebookUser,
 			checkingForUser,
 			applyingTokenToUser,
+			verifyingAuthToken,
 			facebookUser = {
 				name:'facebook user',
 				email:'facebook@user.com'
@@ -249,8 +254,9 @@ describe('Unit::Service authentication service', () => {
 			gettingFacebookUser.resolves(facebookUser);
 			checkingForUser = sandbox.stub(UserClient, 'getUserByEmail').returnsPromise();
 			checkingForUser.resolves(user);
+			verifyingAuthToken = sandbox.stub(Token, 'verifyToken').returnsPromise();
+			verifyingAuthToken.resolves(true);
 			applyingTokenToUser = sandbox.stub(AuthTokenService, 'applyAuthToken').returnsPromise();
-			applyingTokenToUser.resolves(authenticatedUser);
 
 			result = AuthenticationService.authenticateFacebookUser(accessToken);
 		});
@@ -261,6 +267,74 @@ describe('Unit::Service authentication service', () => {
 
 	});
 
+	describe("When authenticating a already registered Facebook user and there auth token is not valid", () => {
+
+		it("it should get the Facebook user with the access token supplied", () => {
+			Expect(gettingFacebookUser).calledWith(accessToken);
+		});
+
+		it("it should enquire to see if the facebook user already exists in the database", () => {
+			Expect(checkingForUser).calledWith(facebookUser.email);
+		});
+
+		it("it should check the validaty of the authentication token", () => {
+				Expect(verifyingAuthToken).calledWith(user.token);
+		})
+
+		it("it should request the re authentication of the user found", () => {
+			Expect(applyingTokenToUser).calledWith(user);
+		});
+
+		it("it should return the user with a new token", () => {
+			return result.then((user) => {
+				Expect(user).to.equal(authenticatedUser);
+			});
+		});
+
+		const accessToken = "accessToken";
+
+		let gettingFacebookUser,
+			checkingForUser,
+			applyingTokenToUser,
+			verifyingAuthToken,
+			facebookUser = {
+				name:'facebook user',
+				email:'facebook@user.com'
+			},
+			user = {
+				name:'facebook user',
+				email:'facebook@user.com',
+				_id:"123",
+				token:'token'
+			},
+			authenticatedUser = {
+				name:'facebook user',
+				email:'facebook@user.com',
+				_id:"123",
+				token:'new token'
+			},
+			result,
+			sandbox = Sinon.sandbox.create();
+
+		beforeEach(() => {
+
+			gettingFacebookUser = sandbox.stub(FacebookClient, 'getFacebookUser').returnsPromise();
+			gettingFacebookUser.resolves(facebookUser);
+			checkingForUser = sandbox.stub(UserClient, 'getUserByEmail').returnsPromise();
+			checkingForUser.resolves(user);
+			verifyingAuthToken = sandbox.stub(Token, 'verifyToken').returnsPromise();
+			verifyingAuthToken.rejects();
+			applyingTokenToUser = sandbox.stub(AuthTokenService, 'applyAuthToken').returnsPromise();
+			applyingTokenToUser.resolves(authenticatedUser);
+			result = AuthenticationService.authenticateFacebookUser(accessToken);
+
+		});
+
+		afterEach(() => {
+			sandbox.restore();
+		});
+		
+	});
 });
 
 
