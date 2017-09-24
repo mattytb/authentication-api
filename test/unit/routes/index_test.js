@@ -49,33 +49,37 @@ describe('Unit::Route index', () => {
 		});
 
 		it('should return all users names found', () => {
-			Expect(res.body[0].name).to.equal("Matt");
-			Expect(res.body[1].name).to.equal("Marta");
+			Expect(res.body.users[0].name).to.equal("Matt");
+			Expect(res.body.users[1].name).to.equal("Marta");
 		});
 
-		it('should return all users names found', () => {
-			Expect(res.body[0].image).to.equal("mattsimage");
-			Expect(res.body[1].image).to.equal("martasimage");
+		it('should return all users images found', () => {
+			Expect(res.body.users[0].image).to.equal("mattsimage");
+			Expect(res.body.users[1].image).to.equal("martasimage");
 		});
 
 		it('should return all users ids found', () => {
-			Expect(res.body[0].id).to.equal("mattsid");
-			Expect(res.body[1].id).to.equal("martasid");
+			Expect(res.body.users[0].id).to.equal("mattsid");
+			Expect(res.body.users[1].id).to.equal("martasid");
 		});
 
 		it('should not return the users email', () => {
-			Expect(res.body[0].email).to.not.exist;
-			Expect(res.body[1].email).to.not.exist;
+			Expect(res.body.users[0].email).to.not.exist;
+			Expect(res.body.users[1].email).to.not.exist;
 		});
 
 		it('should not return the users token', () => {
-			Expect(res.body[0].token).to.not.exist;
-			Expect(res.body[1].token).to.not.exist;
+			Expect(res.body.users[0].token).to.not.exist;
+			Expect(res.body.users[1].token).to.not.exist;
 		});
 
 		it('should have a response status of 200', (done) => {
 			Expect(res.statusValue).to.equal(200);
 			done();
+		});
+
+		it('should set the success on the response to true', () => {
+			Expect(res.body.success).to.be.true;
 		});
 
 	});
