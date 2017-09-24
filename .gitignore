@@ -48,3 +48,5 @@ typings/
 lib/config.js
 
 dist
+
+.DS_Store
