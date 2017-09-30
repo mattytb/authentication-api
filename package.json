@@ -12,7 +12,8 @@
     "mongoose": "^4.8.6",
     "morgan": "^1.8.1",
     "node-fetch": "^1.6.3",
-    "nodemon": "^1.11.0"
+    "nodemon": "^1.11.0",
+    "snyk": "^1.41.1"
   },
   "devDependencies": {
     "babel-cli": "^6.23.0",
@@ -45,12 +46,15 @@
     "test:unit": "mocha -g ^Unit:: --compilers js:babel-core/register --recursive",
     "test:api": "mocha -g ^Api:: --compilers js:babel-core/register --recursive",
     "test:watch": "npm run test:unit -- --watch",
-    "cover": "nyc mocha test --compilers js:babel-core/register --recursive && nyc report --reporter=text-lcov | coveralls"
+    "cover": "nyc mocha test --compilers js:babel-core/register --recursive && nyc report --reporter=text-lcov | coveralls",
+    "snyk-protect": "snyk protect",
+    "prepare": "npm run snyk-protect"
   },
   "nyc": {
     "exclude": [
       "**/*_test.js",
       "node_modules"
     ]
-  }
+  },
+  "snyk": true
 }
