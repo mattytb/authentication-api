@@ -1,4 +1,4 @@
-import {expect} from 'chai';
+import { expect } from 'chai';
 import SuperTest from 'supertest';
 import Should from 'should';
 import express from 'express';
@@ -95,8 +95,7 @@ let token,
           done();
         });
     });
-
-  });
+});
 
   describe('Api::when a user tries to authenticate and does not provide full credentials', () => {
 
@@ -129,8 +128,7 @@ let token,
           done();
         });
     });
-
-  });
+});
 
   describe('Api::when a user deletes himself', () => {
 

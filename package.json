@@ -42,7 +42,7 @@
     "dev": "nodemon lib/server.js --exec babel-node",
     "build": "babel lib -d dist",
     "serve": "node dist/server.js",
-    "unit": "mocha -g ^Unit:: --compilers js:babel-core/register --recursive",
+    "unit": "NODE_ENV=unit mocha -g ^Unit:: --compilers js:babel-core/register --recursive",
     "api": "mocha -g ^Api:: --compilers js:babel-core/register --recursive",
     "cover": "nyc mocha test --compilers js:babel-core/register --recursive && nyc report --reporter=text-lcov | coveralls",
     "snyk-protect": "snyk protect",

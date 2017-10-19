@@ -12,11 +12,13 @@ const Expect = Chai.expect,
 		}
 	},
 	req = request,
-	authenticatedToken = 'Token',
+	authenticatedMobileToken = 'mobileToken',
+	authenticatedWebToken = 'webToken',
 	authenticatedUser = {
 		email:'matt@email.com',
 		password:'password',
-		token:authenticatedToken,
+		webToken:'webToken',
+		mobileToken:'mobileToken',
 		_id:123
 	};
 
@@ -31,7 +33,7 @@ let sandbox = Sinon.sandbox.create(),
 
 describe('Unit::Route authenticate', () => {
 
-	describe('When re-authenticating a user', () => {
+	describe('When re-authenticating a web user', () => {
 
 		it('it should call the authentication service to authenticate user with their email and password', () => {
 			Expect(authenticatingUser).calledWith(req.body.email, req.body.password);
@@ -42,7 +44,7 @@ describe('Unit::Route authenticate', () => {
 		});
 
 	  	it('it should have set the token on the response', () => {
-			Expect(res.body.token).to.equal(authenticatedUser.token);
+			Expect(res.body.token).to.equal(authenticatedUser.webToken);
 		});
 
 		it('it should set success to true on the response', () => {
@@ -68,6 +70,48 @@ describe('Unit::Route authenticate', () => {
 		
 		afterEach(() => {
 		    sandbox.restore();
+		});
+
+	});
+
+	describe('When re-authenticating a mobile user', () => {
+		
+		it('it should call the authentication service to authenticate user with their email and password', () => {
+			Expect(authenticatingUser).calledWith(req.body.email, req.body.password, req.body.fromMobile);
+		});
+
+		it('it should have set the user\'s id on the response', () => {
+			Expect(res.body.userId).to.equal(authenticatedUser._id);
+		});
+
+			it('it should have set the token on the response', () => {
+			Expect(res.body.token).to.equal(authenticatedUser.mobileToken);
+		});
+
+		it('it should set success to true on the response', () => {
+			Expect(res.body.success).to.be.true;
+		});
+
+		it('it should set message to the success message on the response', () => {
+			Expect(res.body.message).to.equal('Enjoy your token');
+		});
+
+		it('it should have a response status of 200', (done) => {
+			Expect(res.statusValue).to.equal(200);
+			done();
+		});
+
+		let authenticatingUser;
+	
+		beforeEach(() => {
+			request.body.fromMobile = true;
+			authenticatingUser = sandbox.stub(AuthenticationService, 'authenticateUser').returnsPromise();
+			authenticatingUser.resolves(authenticatedUser);
+			getAuthToken(req, res);
+		});
+		
+		afterEach(() => {
+			sandbox.restore();
 		});
 
 	});
@@ -125,6 +169,5 @@ describe('Unit::Route authenticate', () => {
 		afterEach(() => {
 		    sandbox.restore();
 		});
-
 	});
 });

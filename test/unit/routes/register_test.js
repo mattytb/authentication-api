@@ -15,7 +15,8 @@ const Expect = Chai.expect,
 		name:'name',
 		password:'password',
 		email:'name@email.com',
-		token:'new token',
+		webToken:'new token',
+		mobileToken:'new mobile token',
 		_id:"123"
 	}
 
@@ -37,7 +38,7 @@ describe('Unit::Route register', () => {
 		});
 
 		it('it should have set the token on the response', () => {
-			Expect(res.body.token).to.equal(authenticatedUser.token);
+			Expect(res.body.token).to.equal(authenticatedUser.webToken);
 		});
 
 		it('it should have set the id of the user on the response', () => {
@@ -102,6 +103,48 @@ describe('Unit::Route register', () => {
 			done();
 		});
 		
+	});
+
+	describe('When registering on mobile', () => {
+		
+		it('it should call the authentication service to authenticate user with their name, password and email', () => {
+			Expect(authenticatingUser).calledWith(req.body.name, req.body.password, req.body.email, req.body.fromMobile);
+		});
+
+		it('it should have set the token on the response', () => {
+			Expect(res.body.token).to.equal(authenticatedUser.mobileToken);
+		});
+
+		it('it should have set the id of the user on the response', () => {
+			Expect(res.body.userId).to.equal(authenticatedUser._id);
+		});
+
+		it('it should set success to true on the response', () => {
+			Expect(res.body.success).to.be.true;
+		});
+
+		it('it should set message to the success message on the response', () => {
+			Expect(res.body.message).to.equal('Enjoy your token!');
+		});
+
+		it('it should have a response status of 200', (done) => {
+			Expect(res.statusValue).to.equal(200);
+			done();
+		});
+
+		let authenticatingUser;
+	
+		beforeEach(() => {
+			req.body.fromMobile = true;
+			authenticatingUser = sandbox.stub(AuthenticationService, 'authenticateNewUser').returnsPromise();
+			authenticatingUser.resolves(authenticatedUser);
+			registerUser(req, res);
+		});
+
+		afterEach(() => {
+			sandbox.restore();
+		});
+
 	});
 });
 

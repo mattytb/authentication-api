@@ -16,7 +16,7 @@ describe('Unit::Route facebookAuthenticate', () => {
     	}
     };
 	
-	describe('When authenticating a facebook user', () => {
+	describe('When authenticating a facebook web user', () => {
 
 		it('should request a facebook user using the access token provided', () => {
 			Expect(authenticatingUser).calledWith(req.body.accessToken);
@@ -27,7 +27,7 @@ describe('Unit::Route facebookAuthenticate', () => {
 		});
 
 	  	it('it should have set the token on the response', () => {
-			Expect(res.body.token).to.equal(authenticatedUser.token);
+			Expect(res.body.token).to.equal(authenticatedUser.webToken);
 		});
 
 		it('it should have set the users name on the response', () => {
@@ -57,7 +57,8 @@ describe('Unit::Route facebookAuthenticate', () => {
 			password:'password',
 			email:'name@email.com',
 			image:'image.jpg',
-			token:'new token',
+			webtoken:'new token',
+			mobileToken:'mobileToken',
 			_id:"123"
 		}
 	
@@ -74,6 +75,71 @@ describe('Unit::Route facebookAuthenticate', () => {
 		const req = {
 			body:{
 				accessToken: 'facebookaccesstoken'
+			}
+		};
+
+	});
+
+	describe('When authenticating a facebook mobile user', () => {
+		
+		it('should request a facebook user using the access token provided', () => {
+			Expect(authenticatingUser).calledWith(req.body.accessToken);
+		});
+
+		it('it should have set the user\'s id on the response', () => {
+			Expect(res.body.userId).to.equal(authenticatedUser._id);
+		});
+
+		it('it should have set the token on the response', () => {
+			Expect(res.body.token).to.equal(authenticatedUser.mobileToken);
+		});
+
+		it('it should have set the users name on the response', () => {
+			Expect(res.body.name).to.equal(authenticatedUser.name);
+		});
+
+		it('it should have set the users image on the response', () => {
+			Expect(res.body.image).to.equal(authenticatedUser.image);
+		});
+
+		it('it should set success to true on the response', () => {
+			Expect(res.body.success).to.be.true;
+		});
+
+		it('it should set message to the success message on the response', () => {
+			Expect(res.body.message).to.equal('Enjoy your token');
+		});
+
+		it('it should have a response status of 200', (done) => {
+			Expect(res.statusValue).to.equal(200);
+			done();
+		});
+
+		let authenticatingUser,
+			authenticatedUser = {
+			name:'name',
+			password:'password',
+			email:'name@email.com',
+			image:'image.jpg',
+			mobileToken:'new mobile token',
+			webToken:'new web token',
+			_id:"123"
+		}
+	
+		beforeEach(() => {
+				authenticatingUser = sandbox.stub(AuthenticationService, 'authenticateFacebookUser').returnsPromise();
+				authenticatingUser.resolves(authenticatedUser);
+			authenticate(req, res);
+		});
+		
+		afterEach(() => {
+			sandbox.restore();
+		});
+
+		const req = {
+			body:{
+				accessToken: 'facebookaccesstoken',
+				fromMobile:true
 			}
 		};
 
@@ -104,7 +170,7 @@ describe('Unit::Route facebookAuthenticate', () => {
 			password:'password',
 			email:'name@email.com',
 			image:'image.jpg',
-			token:'new token',
+			webToken:'new token',
 			_id:"123"
 		}
 	
