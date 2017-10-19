@@ -7,7 +7,8 @@ const app = require('../../lib/server');
 
 
 let token,
-    userId;
+    userId,
+    mobileToken;   
     
   describe('Api::when a user registers', () => {
 
@@ -26,10 +27,50 @@ let token,
         });
     });
 
+    it('it should not allow the user to register again on the mobile when user supplies name, password and email', (done) => {
+      SuperTest(app)
+      .post('/api/users')
+      .send({'name' : 'Super Test', password : 'Password', email : 'email@supertester.com', fromMobile:true})
+      .expect("Content-type",/json/)
+      .expect(200)
+      .end(function(err,res){
+        res.status.should.equal(409);
+        res.body.success.should.equal(false);
+        done();
+      });
+  });
+
+  it('it should allow the user to re-authenticate with their email and password on the mobile', (done) => {
+    SuperTest(app)
+      .post('/api/authenticate')
+      .send({email : 'email@supertester.com', password : 'Password', fromMobile:true})
+      .expect("Content-type",/json/)
+      .expect(200)
+      .end(function(err,res){
+        res.status.should.equal(200);
+        res.body.success.should.equal(true);
+        mobileToken = res.body.token;
+        done();
+      });
+  });
+
     it('should allow the user to access data requiring validation when requesting with token', (done) => {
       SuperTest(app)
         .get('/api/users')
         .send({userId: userId, token:token})
+        .expect("Content-type",/json/)
+        .expect(200)
+        .end(function(err,res){
+          res.status.should.equal(200);
+          res.body.users[res.body.users.length -1].name.should.equal('Super Test');
+          done();
+        });
+    });
+
+    it('should allow the mobile user to access data requiring validation  with mobile token', (done) => {
+      SuperTest(app)
+        .get('/api/users')
+        .send({userId: userId, token:mobileToken, fromMobile:true})
         .expect("Content-type",/json/)
         .expect(200)
         .end(function(err,res){
@@ -52,6 +93,8 @@ let token,
         });
     });
   });
+
+ 
 
   describe('Api::when a users token has expired and he needs to re-authenticate, it', () => {
 
@@ -149,6 +192,19 @@ let token,
       SuperTest(app)
         .post('/api/authenticate')
         .send({email : 'email@supertester.com', password : 'Password'})
+        .expect("Content-type",/json/)
+        .expect(401)
+        .end(function(err,res){
+          res.status.should.equal(401);
+          res.body.success.should.equal(false);
+          done();
+        });
+    });
+
+    it('it should not allow the user to authenticate with deleted name and password on the mobile', (done) => {
+      SuperTest(app)
+        .post('/api/authenticate')
+        .send({email : 'email@supertester.com', password : 'Password', fromMobile:true})
         .expect("Content-type",/json/)
         .expect(401)
         .end(function(err,res){
