@@ -45,7 +45,7 @@
     "start": "node dist/server.js",
     "unit": "NODE_ENV=unit mocha -g ^Unit:: --compilers js:babel-core/register --recursive",
     "api": "mocha -g ^Api:: --compilers js:babel-core/register --recursive",
-    "cover": "nyc mocha test --compilers js:babel-core/register --recursive && nyc report --reporter=text-lcov | coveralls",
+    "cover": "nyc mocha test -g --compilers js:babel-core/register --recursive && nyc report --reporter=text-lcov | coveralls",
     "snyk-protect": "snyk protect",
     "prepare": "npm run snyk-protect"
   },

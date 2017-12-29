@@ -132,84 +132,45 @@ describe('Unit::userClient', () => {
 		});
 	});
 
-	describe('When successfully saving a web token to a user', () => {
+	// describe('When successfully saving a web token to a user', () => {
 
-		it('it should request the user by id', () => {
-			Expect(gettingUserById).calledWith(id);
-		});
+	// 	it('it should request the user by id', () => {
+	// 		Expect(gettingUserById).calledWith(id);
+	// 	});
 
-		it('it should return the user with the token passed applied', () => {
-			return result.then((data) => {
-				Expect(data).to.equal(fetchedUser);
-				Expect(data.webToken).to.equal(webToken);
-			});
-		});
+	// 	it('it should return the user with the token passed applied', () => {
+	// 		return result.then((data) => {
+	// 			Expect(data).to.equal(fetchedUser);
+	// 			Expect(data.webToken).to.equal(webToken);
+	// 		});
+	// 	});
 
-		const id = 123,
-			webToken = 'webToken',
-			fetchedUser = {
-				'name':'matt',
-				'webToken':null,
-				'mobileToken':null,
-				'_id' : 123,
-				'save':Sinon.spy()
-			};
+	// 	const id = 123,
+	// 		webToken = 'webToken',
+	// 		fetchedUser = {
+	// 			'name':'matt',
+	// 			'webToken':null,
+	// 			'mobileToken':null,
+	// 			'_id' : 123,
+	// 			'save':Sinon.spy()
+	// 		};
 
-		let gettingUserById,
-			result,
-			sandbox = Sinon.sandbox.create();
+	// 	let gettingUserById,
+	// 		result,
+	// 		sandbox = Sinon.sandbox.create();
 
-		beforeEach(() => {
+	// 	beforeEach(() => {
 			
-			gettingUserById = sandbox.stub(mongoose.Model, 'findById').returnsPromise();
-			gettingUserById.resolves(fetchedUser);
-			result = UserClient.saveWebTokenToUser(id, webToken);
-		});
+	// 		gettingUserById = sandbox.stub(mongoose.Model, 'findById').returnsPromise();
+	// 		gettingUserById.resolves(fetchedUser);
+	// 		result = UserClient.saveWebTokenToUser(id, webToken);
+	// 	});
 
-		afterEach(function() {
-			sandbox.restore();
-		});
+	// 	afterEach(function() {
+	// 		sandbox.restore();
+	// 	});
 
-	});
-
-	describe('When successfully saving a mobile token to a user', () => {
-		
-		it('it should request the user by id', () => {
-			Expect(gettingUserById).calledWith(id);
-		});
-
-		it('it should return the user with the token passed applied', () => {
-			return result.then((data) => {
-				Expect(data).to.equal(fetchedUser);
-				Expect(data.mobileToken).to.equal(mobileToken);
-			});
-		});
-
-		const id = 123,
-			mobileToken = 'mobileToken',
-			fetchedUser = {
-				'name':'matt',
-				'mobileToken':null,
-				'webToken':'null',
-				'_id' : 123,
-				'save':Sinon.spy()
-			};
-
-		let gettingUserById,
-			result,
-			sandbox = Sinon.sandbox.create();
-
-		beforeEach(() => {
-			gettingUserById = sandbox.stub(mongoose.Model, 'findById').returnsPromise();
-			gettingUserById.resolves(fetchedUser);
-			result = UserClient.saveMobileTokenToUser(id, mobileToken);
-		});
-
-		afterEach(function() {
-			sandbox.restore();
-		});
-
-	});
+	// });
 
 	describe('When successfully saving a new user', () => {
 

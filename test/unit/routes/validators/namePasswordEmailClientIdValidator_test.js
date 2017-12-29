@@ -1,4 +1,4 @@
-import { hasNamePasswordAndEmail } from '../../../../lib/routes/validators/namePasswordAndEmailValidator';
+import { hasNamePasswordEmailClientId } from '../../../../lib/routes/validators/namePasswordEmailClientIdValidator';
 import Sinon from 'sinon';
 import * as Chai from 'chai';
 
@@ -13,21 +13,22 @@ let res = {
     },
 	next;
 
-describe('Unit::Route Validator namePasswordAndEmailValidator', () => {
+describe('Unit::Route Validator namePasswordEmailClientIdValidator', () => {
 
-	describe('When all name password and email are present, it', () => {
+	describe('When all name password email and client are present, it', () => {
 
 		const req = {
 			body:{
 				name:'matt',
 				password:'password',
-				email:'matt@email.com'
+				email:'matt@email.com',
+				clientId:'browser'
 			}
 		};
 
 		beforeEach(() => {
 			next = Sinon.spy();
-			hasNamePasswordAndEmail(req, res, next);
+			hasNamePasswordEmailClientId(req, res, next);
 		});
 
 		it('should call the next function on router', () => {
@@ -48,7 +49,7 @@ describe('Unit::Route Validator namePasswordAndEmailValidator', () => {
 
 		beforeEach(() => {
 			next = Sinon.spy();
-			hasNamePasswordAndEmail(req, res, next);
+			hasNamePasswordEmailClientId(req, res, next);
 		});
 
 		it('should not call the next function on router', () => {
@@ -83,7 +84,7 @@ describe('Unit::Route Validator namePasswordAndEmailValidator', () => {
 
 		beforeEach(() => {
 			next = Sinon.spy();
-			hasNamePasswordAndEmail(req, res, next);
+			hasNamePasswordEmailClientId(req, res, next);
 		});
 
 		it('should not call the next function on router', () => {
@@ -116,7 +117,41 @@ describe('Unit::Route Validator namePasswordAndEmailValidator', () => {
 
 		beforeEach(() => {
 			next = Sinon.spy();
-			hasNamePasswordAndEmail(req, res, next);
+			hasNamePasswordEmailClientId(req, res, next);
+		});
+
+		it('should not call the next function on router', () => {
+			Expect(next.calledOnce).to.be.false;
+		});
+
+		it('should set the response success value to false', () => {
+			Expect(res.body.success).to.be.false;
+		});
+
+		it('should set the response message to the failed message', () => {
+			Expect(res.body.message).to.equal("missing credentials");
+		});
+
+		it('should have a response status of 403', (done) => {
+			Expect(res.statusValue).to.equal(403);
+			done();
+		});
+
+	});
+
+	describe('When client id is not sent, it', () => {
+
+		const req = {
+			body:{
+				name:'matt',
+				password:'password',
+				email:'matt@email.com'
+			}
+		};
+
+		beforeEach(() => {
+			next = Sinon.spy();
+			hasNamePasswordEmailClientId(req, res, next);
 		});
 
 		it('should not call the next function on router', () => {
@@ -149,7 +184,7 @@ describe('Unit::Route Validator namePasswordAndEmailValidator', () => {
 
 		beforeEach(() => {
 			next = Sinon.spy();
-			hasNamePasswordAndEmail(req, res, next);
+			hasNamePasswordEmailClientId(req, res, next);
 		});
 
 		it('should not call the next function on router', () => {
