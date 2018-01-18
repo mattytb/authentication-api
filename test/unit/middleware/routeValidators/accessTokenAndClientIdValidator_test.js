@@ -1,4 +1,4 @@
-import { hasAccessToken } from '../../../../lib/routes/validators/accessTokenValidator';
+import { hasAccessTokenAndClientId } from '../../../../lib/middleware/routeValidators/accessTokenAndClientIdValidator';
 import Sinon from 'sinon';
 import * as Chai from 'chai';
 
@@ -13,9 +13,9 @@ let res = {
     },
 	next;
 
-describe('Unit::Route Validator accessTokenValidator', () => {
+describe('Unit::Route Validator accessTokenAndClinetValidator', () => {
 
-	describe('When access token present', () => {
+	describe('When access token and client id are present', () => {
 
 		it('it should call the next function on router', () => {
 			Expect(next.calledOnce).to.be.true;
@@ -23,13 +23,14 @@ describe('Unit::Route Validator accessTokenValidator', () => {
 
 		const req = {
 			body:{
-				accessToken:'accesstoken'
+				accessToken:'accesstoken',
+				clientId:'clientId'
 			}
 		};
 
 		beforeEach(() => {
 			next = Sinon.spy();
-			hasAccessToken(req, res, next);
+			hasAccessTokenAndClientId(req, res, next);
 		});
 
 	});
@@ -56,18 +57,19 @@ describe('Unit::Route Validator accessTokenValidator', () => {
 		const req = {
 			body:{
 				accessToken:null,
+				clientId:'123'
 			}
 		};
 
 		beforeEach(() => {
 			next = Sinon.spy();
-			hasAccessToken(req, res, next);
+			hasAccessTokenAndClientId(req, res, next);
 		});
 
 
 	});
 
-	describe('When access token is an empty string', () => {
+	describe('When client id is an empty string', () => {
 
 		it('should not call the next function on router', () => {
 			Expect(next.calledOnce).to.be.false;
@@ -88,13 +90,14 @@ describe('Unit::Route Validator accessTokenValidator', () => {
 
 		const req = {
 			body:{
-				accessToken:''
+				accessToken:'accessToken',
+				clientId:''
 			}
 		};
 
 		beforeEach(() => {
 			next = Sinon.spy();
-			hasAccessToken(req, res, next);
+			hasAccessTokenAndClientId(req, res, next);
 		});
 
 	});

@@ -1,4 +1,4 @@
-import { hasNamePasswordEmailClientId } from '../../../../lib/routes/validators/namePasswordEmailClientIdValidator';
+import { hasNamePasswordEmailClientId } from '../../../../lib/middleware/routeValidators/namePasswordEmailClientIdValidator';
 import Sinon from 'sinon';
 import * as Chai from 'chai';
 

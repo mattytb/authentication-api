@@ -1,6 +1,5 @@
-import * as AuthenticationService from '../../../lib/services/authenticationService';
-import { getAuthToken, getAuthStatus } from '../../../lib/routes/authenticate';
-import * as VerifyUser from '../../../lib/modules/verifyUser';
+import * as AuthorizationService from '../../../lib/services/authorizationService';
+import { getAuthStatus, authorize } from '../../../lib/routes/authorize';
 import * as Chai from 'chai';
 import Sinon from 'sinon';
 
@@ -8,19 +7,16 @@ const Expect = Chai.expect,
 	request = {
 		body:{
 			email:'matt@email.com',
-			password:'password'
+			password:'password',
+			clientId:'clientId'
 		}
 	},
 	req = request,
-	authenticatedMobileToken = 'mobileToken',
-	authenticatedWebToken = 'webToken',
-	authenticatedUser = {
-		email:'matt@email.com',
-		password:'password',
-		webToken:'webToken',
-		mobileToken:'mobileToken',
-		_id:123
-	};
+	claim = {
+		name:'name',
+		authorizationToken:'new token',
+		_id:"123"
+	}
 
 let sandbox = Sinon.sandbox.create(),
 	res = { 
@@ -28,31 +24,31 @@ let sandbox = Sinon.sandbox.create(),
 		status:function(status) {
 			res.statusValue = status;
         	return this;
-    	}
+		},
+		jsonError:(obj) => { 
+			res.body = obj,
+			res.statusValue = obj.status 
+		},
+		jsonAuthenticate:(req, res) => { 
+			res.body = res.body,
+			res.statusValue = res.statusValue 
+		}
     };
 
-describe('Unit::Route authenticate', () => {
+describe('Unit::Route authorize', () => {
 
-	describe('When re-authenticating a web user', () => {
+	describe('When re-authorizing a web user', () => {
 
-		it('it should call the authentication service to authenticate user with their email and password', () => {
-			Expect(authenticatingUser).calledWith(req.body.email, req.body.password);
+		it('it should call the authorization service to authorize user with their email and password and client id', () => {
+			Expect(authorizingUser).calledWith(req.body.email, req.body.password, req.body.clientId);
 		});
 
-		it('it should have set the user\'s id on the response', () => {
-			Expect(res.body.userId).to.equal(authenticatedUser._id);
-		});
-
-	  	it('it should have set the token on the response', () => {
-			Expect(res.body.token).to.equal(authenticatedUser.webToken);
+		it('it should have set the claim on the response', () => {
+			Expect(res.body.claim).to.equal(claim);
 		});
 
 		it('it should set success to true on the response', () => {
 			Expect(res.body.success).to.be.true;
-		});
-
-		it('it should set message to the success message on the response', () => {
-			Expect(res.body.message).to.equal('Enjoy your token');
 		});
 
 		it('it should have a response status of 200', (done) => {
@@ -60,114 +56,50 @@ describe('Unit::Route authenticate', () => {
 			done();
 		});
 
-		let authenticatingUser;
+		let authorizingUser;
 	
 		beforeEach(() => {
-		 	authenticatingUser = sandbox.stub(AuthenticationService, 'authenticateUser').returnsPromise();
-		 	authenticatingUser.resolves(authenticatedUser);
-			getAuthToken(req, res);
+		 	authorizingUser = sandbox.stub(AuthorizationService, 'authorizeUser').returnsPromise();
+		 	authorizingUser.resolves(claim);
+			authorize(req, res);
 		});
 		
 		afterEach(() => {
 		    sandbox.restore();
 		});
-
 	});
 
-	describe('When re-authenticating a mobile user', () => {
-		
-		it('it should call the authentication service to authenticate user with their email and password', () => {
-			Expect(authenticatingUser).calledWith(req.body.email, req.body.password, req.body.fromMobile);
-		});
+	describe('When not re-authorizing because user is not found, it', () => {
 
-		it('it should have set the user\'s id on the response', () => {
-			Expect(res.body.userId).to.equal(authenticatedUser._id);
-		});
-
-			it('it should have set the token on the response', () => {
-			Expect(res.body.token).to.equal(authenticatedUser.mobileToken);
-		});
-
-		it('it should set success to true on the response', () => {
-			Expect(res.body.success).to.be.true;
-		});
-
-		it('it should set message to the success message on the response', () => {
-			Expect(res.body.message).to.equal('Enjoy your token');
-		});
-
-		it('it should have a response status of 200', (done) => {
-			Expect(res.statusValue).to.equal(200);
-			done();
-		});
-
-		let authenticatingUser;
-	
-		beforeEach(() => {
-			request.body.fromMobile = true;
-			authenticatingUser = sandbox.stub(AuthenticationService, 'authenticateUser').returnsPromise();
-			authenticatingUser.resolves(authenticatedUser);
-			getAuthToken(req, res);
-		});
-		
-		afterEach(() => {
-			sandbox.restore();
-		});
-
-	});
-
-	describe('When not re-authenticating because user is not found, it', () => {
-
-		it('it should attempt to call the authentication service to authenticate user with their email and password', () => {
-			Expect(authenticatingUser).calledWith(req.body.email, req.body.password);
-		});
-
-  		it('should set the success value to false', () => {
-			Expect(res.body.success).to.be.false;
+		it('it should attempt to call the authorization service to authorize user with their email, password and client id', () => {
+			Expect(authorizingUser).calledWith(req.body.email, req.body.password, req.body.clientId);
 		});
 
 		it('should set message value to the error message', () => {
 			Expect(res.body.message).to.equal(rejectedUserClientMessage);
 		});
 
-		it('should have a response status of 401', (done) => {
+		it('should have a response status of 401', () => {
 			Expect(res.statusValue).to.equal(401);
-			done();
 		});
 		
 		const rejectedUserClientMessage = 'rejected message from user client';
 
-		let authenticatingUser;
+		let authorizingUser,
+			result,
+			error = new Error(rejectedUserClientMessage);
+			error.status = 401;
 	
 		beforeEach(() => {
-		 	authenticatingUser = sandbox.stub(AuthenticationService, 'authenticateUser').returnsPromise();
-		 	authenticatingUser.rejects(new Error(rejectedUserClientMessage));
-		 	getAuthToken(req, res);
+			
+		 	authorizingUser = sandbox.stub(AuthorizationService, 'authorizeUser').returnsPromise();
+		 	authorizingUser.rejects(error);
+		 	result = authorize(req, res);
 		});
 		
 		afterEach(() => {
 		    sandbox.restore();
 		});
 
-	});
-
-	describe('When checking the status of authenticated user', () => {
-
-		it('it set the success value on the response to true', () => {
-			Expect(res.body.success).to.equal(true);
-		});
-
-		it('it should have a response status of 200', (done) => {
-			Expect(res.statusValue).to.equal(200);
-			done();
-		});
-	
-		beforeEach(() => {
-		 	getAuthStatus(req, res);
-		});
-		
-		afterEach(() => {
-		    sandbox.restore();
-		});
 	});
 });

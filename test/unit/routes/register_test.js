@@ -1,5 +1,5 @@
 import { registerUser } from '../../../lib/routes/register';
-import * as AuthenticationService from '../../../lib/services/authenticationService';
+import * as AuthorizationService from '../../../lib/services/authorizationService';
 import * as Chai from 'chai';
 import Sinon from 'sinon';
 
@@ -14,7 +14,7 @@ const Expect = Chai.expect,
 	},
 	claim = {
 		name:'name',
-		token:'new token',
+		authorizationToken:'new token',
 		_id:"123"
 	}
 
@@ -24,15 +24,19 @@ let sandbox = Sinon.sandbox.create(),
 		status:function(status) {
 			res.statusValue = status;
         	return this;
-    	}
+    	},
+		jsonError:(obj) => { 
+			res.body = obj,
+			res.statusValue = obj.status 
+		}
     };
 
 describe('Unit::Route register', () => {
 
 	describe('When registering', () => {
 
-		it('it should call the authentication service to authenticate user with their name, password, email and the client id', () => {
-			Expect(authenticatingUser).calledWith(req.body.name, req.body.password, req.body.email, req.body.clientId);
+		it('it should call the authorization service to authorize user with their name, password, email and the client id', () => {
+			Expect(authorizingUser).calledWith(req.body.name, req.body.password, req.body.email, req.body.clientId);
 		});
 		it('it should have set the body success to true', () => {
 			Expect(res.body.success).to.equal(true);
@@ -45,11 +49,11 @@ describe('Unit::Route register', () => {
 			done();
 		});
 
-		let authenticatingUser;
+		let authorizingUser;
 	
 		beforeEach(() => {
-		 	authenticatingUser = sandbox.stub(AuthenticationService, 'authenticateNewUser').returnsPromise();
-		 	authenticatingUser.resolves(claim);
+		 	authorizingUser = sandbox.stub(AuthorizationService, 'authorizeNewUser').returnsPromise();
+		 	authorizingUser.resolves(claim);
 			registerUser(req, res);
 		});
 
@@ -61,11 +65,13 @@ describe('Unit::Route register', () => {
 
 	describe('When failing to register because the users email already exists, it', () => {
 
-		let authenticatingUser;
+		let authorizingUser,
+			error = new Error("message from error");
+			error.status = 409;
 	
 		beforeEach(() => {
-		 	authenticatingUser = sandbox.stub(AuthenticationService, 'authenticateNewUser').returnsPromise();
-		 	authenticatingUser.rejects(new Error("message from error"));
+		 	authorizingUser = sandbox.stub(AuthorizationService, 'authorizeNewUser').returnsPromise();
+		 	authorizingUser.rejects(error);
 			registerUser(req, res);
 		});
 
@@ -73,24 +79,18 @@ describe('Unit::Route register', () => {
 		    sandbox.restore();
 		});
 
-		it('it should attempt to call the authentication service to authenticate user with their name, password and email', () => {
-			Expect(authenticatingUser).calledWith(req.body.name, req.body.password, req.body.email, req.body.clientId);
-		});
-
-		it('should set success to false on the response', () => {
-			Expect(res.body.success).to.be.false;
+		it('it should attempt to call the authorization service to authorize user with their name, password and email', () => {
+			Expect(authorizingUser).calledWith(req.body.name, req.body.password, req.body.email, req.body.clientId);
 		});
 
 		it('should set message to the success message on the response', () => {
-			Expect(res.body.message).to.equal('message from error');
+			Expect(res.body.message).to.equal(error.message);
 		});
 
-		it('should have a response status of 409', (done) => {
-			Expect(res.statusValue).to.equal(409);
+		it('should have a response status of the error', (done) => {
+			Expect(res.statusValue).to.equal(error.status);
 			done();
 		});
-		
 	});
-
 });
 

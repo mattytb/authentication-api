@@ -40,9 +40,9 @@ let token,
       });
   });
 
-  it('it should allow the user to re-authenticate with their email and password on the mobile', (done) => {
+  it('it should allow the user to re-authorize with their email and password on the mobile', (done) => {
     SuperTest(app)
-      .post('/api/authenticate')
+      .post('/api/authorize')
       .send({email : 'email@supertester.com', password : 'Password', fromMobile:true})
       .expect("Content-type",/json/)
       .expect(200)
@@ -96,11 +96,11 @@ let token,
 
  
 
-  describe('Api::when a users token has expired and he needs to re-authenticate, it', () => {
+  describe('Api::when a users token has expired and he needs to re-authorize, it', () => {
 
-    it('it should allow the user to re-authenticate with their email and password', (done) => {
+    it('it should allow the user to re-authorize with their email and password', (done) => {
       SuperTest(app)
-        .post('/api/authenticate')
+        .post('/api/authorize')
         .send({email : 'email@supertester.com', password : 'Password'})
         .expect("Content-type",/json/)
         .expect(200)
@@ -126,9 +126,9 @@ let token,
         });
     });
 
-    it('it should not allow the user to re-authenticate with incorrect password', (done) => {
+    it('it should not allow the user to re-authorize with incorrect password', (done) => {
       SuperTest(app)
-        .post('/api/authenticate')
+        .post('/api/authorize')
         .send({email : 'email@supertester.com', password : 'password-wrong'})
         .expect("Content-type",/json/)
         .expect(401)
@@ -140,7 +140,7 @@ let token,
     });
 });
 
-  describe('Api::when a user tries to authenticate and does not provide full credentials', () => {
+  describe('Api::when a user tries to authorize and does not provide full credentials', () => {
 
     it('it should not supply a token', (done) => {
       SuperTest(app)
@@ -157,7 +157,7 @@ let token,
 
   });
 
-  describe('Api::when a user tries to access data that requires authentication without a token', () => {
+  describe('Api::when a user tries to access data that requires authorization without a token', () => {
 
     it('it should not allow access to the data', (done) => {
       SuperTest(app)
@@ -188,9 +188,9 @@ let token,
         });
     });
 
-    it('it should not allow the user to authenticate with deleted name and password', (done) => {
+    it('it should not allow the user to authorize with deleted name and password', (done) => {
       SuperTest(app)
-        .post('/api/authenticate')
+        .post('/api/authorize')
         .send({email : 'email@supertester.com', password : 'Password'})
         .expect("Content-type",/json/)
         .expect(401)
@@ -201,9 +201,9 @@ let token,
         });
     });
 
-    it('it should not allow the user to authenticate with deleted name and password on the mobile', (done) => {
+    it('it should not allow the user to authorize with deleted name and password on the mobile', (done) => {
       SuperTest(app)
-        .post('/api/authenticate')
+        .post('/api/authorize')
         .send({email : 'email@supertester.com', password : 'Password', fromMobile:true})
         .expect("Content-type",/json/)
         .expect(401)

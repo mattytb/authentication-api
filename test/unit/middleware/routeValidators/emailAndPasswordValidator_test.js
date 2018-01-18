@@ -1,4 +1,4 @@
-import { hasEmailAndPassword } from '../../../../lib/routes/validators/emailAndPasswordValidator';
+import { hasEmailAndPassword } from '../../../../lib/middleware/routeValidators/emailAndPasswordValidator';
 import Sinon from 'sinon';
 import * as Chai from 'chai';
 
@@ -13,7 +13,7 @@ let res = {
     },
 	next;
 
-describe('Unit::Route Validator nameAndPasswordValidator', () => {
+describe('Unit::Route Validator emailAndPasswordValidator', () => {
 
 	describe('When both email and password are present, it', () => {
 
