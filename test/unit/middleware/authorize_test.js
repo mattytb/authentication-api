@@ -71,8 +71,6 @@ describe('Unit::Middleware authorize', () => {
         afterEach(() => {
             sandbox.restore();
         })
-
-       
     });
         
     describe('when authorization token is valid and no refresh token is present', () => {
@@ -172,6 +170,5 @@ describe('Unit::Middleware authorize', () => {
         afterEach(() => {
             sandbox.restore();
         })
-
     });
 });

@@ -9,16 +9,11 @@ const Expect = Chai.expect,
 
 let sandbox = Sinon.sandbox.create(),
 	res = {
-		json:(obj) => { res.body = obj },
-		status:function(status) {
-			res.statusValue = status;
-        	return this;
-		},
 		jsonError:(obj, result) => { 
 			res.body = obj;
 			res.statusValue = obj.status;
 		},
-		jsonAuthenticate:(req, res, data) => { 
+		jsonAuthorized:(res, data) => { 
 			res.body = data
 		}
     };

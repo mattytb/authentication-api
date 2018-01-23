@@ -4,7 +4,7 @@ import Sinon from 'sinon';
 const Expect = Chai.expect;
 
 import * as ClaimClient from '../../../lib/clients/claimClient';
-import * as Claim from '../../../lib/models/claim';
+import * as ClaimModel from '../../../lib/models/claim';
 import mongoose from 'mongoose';
 
 import * as newClaimProvider from '../../../lib/models/providers/newClaimProvider';
@@ -164,5 +164,45 @@ describe('Unit::claimClient', () => {
             sandbox.restore();
         });
 
-    })
+    });
+
+    describe('when getting a claim and a user with a authorization token', () => {
+
+        it('it should request the claim using the authorization token', () => {
+            Expect(requestingClaim).calledWith({authorizationToken:authorizationToken});
+        });
+
+        it('it should return a claim', () => {
+            return result.then((data) => {
+                Expect(data).to.equal(claimWithClaimant.claimant);
+            });
+        });
+
+        const authorizationToken = 'authorizationToken';
+
+        let sandbox = Sinon.sandbox.create(),
+            requestingClaim,
+            result, 
+            claimWithClaimant = {
+                _id:'123',
+                claimant:{ 
+                    _id:'123'
+                },
+                authorizationToken:'authToken',
+                refreshToken:'refreshToken',
+                clientId:'clientId'
+            }
+
+        beforeEach(() => {
+            requestingClaim = sandbox.stub(mongoose.Model, 'findOne').returns({
+                populate:sandbox.stub().returnsPromise().resolves(claimWithClaimant)
+            })
+            result = ClaimClient.getUserByAuthorizationToken(authorizationToken);
+        });
+
+        afterEach(function() {
+            sandbox.restore();
+        });
+
+    });
 });

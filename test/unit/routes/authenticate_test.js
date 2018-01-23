@@ -29,9 +29,8 @@ let sandbox = Sinon.sandbox.create(),
 			res.body = obj,
 			res.statusValue = obj.status 
 		},
-		jsonAuthenticate:(req, res) => { 
-			res.body = res.body,
-			res.statusValue = res.statusValue 
+		jsonAuthorized:(res, data) => { 
+			res.body = data
 		}
     };
 

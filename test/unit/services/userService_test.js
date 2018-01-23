@@ -3,6 +3,7 @@ import Sinon from 'sinon';
 import * as UserClient from '../../../lib/clients/userClient';
 import * as ClaimClient from '../../../lib/clients/claimClient';
 import { getUserDetails, deleteUser } from '../../../lib/services/userService';
+import * as AuthorizationTokenHelper from '../../../lib/modules/authorizationTokenHelper';
 const Expect = Chai.expect;
 
 describe('Unit::Service user service', () => {
@@ -61,6 +62,10 @@ describe('Unit::Service user service', () => {
 
     describe('when deleting a user as and admin', () => {
 
+        it('should get authorization token from the authorization token with bearer', () => {
+            Expect(strippingOutAuthorizationToken).calledWith(authorizationTokenWithBearer);
+        });
+
         it('should request the user with the requesting users token', () => {
             Expect(fetchingUser).calledWith(authorizationToken);
         });
@@ -77,7 +82,8 @@ describe('Unit::Service user service', () => {
         
         const userIdToDelete = 123,
             differentUserId = 321,
-            authorizationToken = 'token';
+            authorizationToken = 'token',
+            authorizationTokenWithBearer = 'tokenWithBearer';
 
         let deletingUser,
             userActioningDelete = {
@@ -85,16 +91,18 @@ describe('Unit::Service user service', () => {
                 admin:true,
                 _id:differentUserId
             },
+            strippingOutAuthorizationToken,
             fetchingUser,
             sandbox = Sinon.sandbox.create(),
             result;
 
         beforeEach(() => {
+            strippingOutAuthorizationToken = sandbox.stub(AuthorizationTokenHelper, 'stripOutBearerToJustAuthorizationToken').callsFake(() => {return authorizationToken });
             fetchingUser = sandbox.stub(ClaimClient, 'getUserByAuthorizationToken').returnsPromise();
             fetchingUser.resolves(userActioningDelete);
             deletingUser = sandbox.stub(UserClient, 'deleteUserById').returnsPromise();
             deletingUser.resolves(userIdToDelete);
-            result = deleteUser(authorizationToken, userIdToDelete);
+            result = deleteUser(authorizationTokenWithBearer, userIdToDelete);
         });
 
         afterEach(() => {
@@ -104,6 +112,10 @@ describe('Unit::Service user service', () => {
 
     describe('when deleting a yourself', () => {
 
+        it('should get authorization token from the authorization token with bearer', () => {
+            Expect(strippingOutAuthorizationToken).calledWith(authorizationTokenWithBearer);
+        });
+
         it('should request the user with the requesting users token', () => {
             Expect(fetchingUser).calledWith(authorizationToken);
         });
@@ -120,7 +132,8 @@ describe('Unit::Service user service', () => {
         
         const userIdToDelete = 123,
             differentUserId = 321,
-            authorizationToken = 'token';
+            authorizationToken = 'token',
+            authorizationTokenWithBearer = 'tokenWithBearer';
 
         let deletingUser,
             userActioningDelete = {
@@ -128,16 +141,18 @@ describe('Unit::Service user service', () => {
                 admin:false,
                 _id:userIdToDelete
             },
+            strippingOutAuthorizationToken,
             fetchingUser,
             sandbox = Sinon.sandbox.create(),
             result;
 
         beforeEach(() => {
+            strippingOutAuthorizationToken = sandbox.stub(AuthorizationTokenHelper, 'stripOutBearerToJustAuthorizationToken').callsFake(() => {return authorizationToken });
             fetchingUser = sandbox.stub(ClaimClient, 'getUserByAuthorizationToken').returnsPromise();
             fetchingUser.resolves(userActioningDelete);
             deletingUser = sandbox.stub(UserClient, 'deleteUserById').returnsPromise();
             deletingUser.resolves(userIdToDelete);
-            result = deleteUser(authorizationToken, userIdToDelete);
+            result = deleteUser(authorizationTokenWithBearer, userIdToDelete);
         });
 
         afterEach(() => {
@@ -146,6 +161,10 @@ describe('Unit::Service user service', () => {
     });
 
     describe('when do not have authorisation to delete a user,', () => {
+
+        it('should get authorization token from the authorization token with bearer', () => {
+            Expect(strippingOutAuthorizationToken).calledWith(authorizationTokenWithBearer);
+        });
 
         it('should request the user with the requesting users token', () => {
             Expect(fetchingUser).calledWith(authorizationToken);
@@ -166,7 +185,8 @@ describe('Unit::Service user service', () => {
         
         const userIdToDelete = 123,
             differentUserId = 321,
-            authorizationToken = 'token';
+            authorizationToken = 'token',
+            authorizationTokenWithBearer = 'tokenWithBearer';
 
         let deletingUser,
             userActioningDelete = {
@@ -174,15 +194,17 @@ describe('Unit::Service user service', () => {
                 admin:false,
                 _id:differentUserId
             },
+            strippingOutAuthorizationToken,
             fetchingUser,
             sandbox = Sinon.sandbox.create(),
             result;
 
         beforeEach(() => {
+            strippingOutAuthorizationToken = sandbox.stub(AuthorizationTokenHelper, 'stripOutBearerToJustAuthorizationToken').callsFake(() => {return authorizationToken });
             fetchingUser = sandbox.stub(ClaimClient, 'getUserByAuthorizationToken').returnsPromise();
             fetchingUser.resolves(userActioningDelete);
             deletingUser = sandbox.stub(UserClient, 'deleteUserById').returnsPromise();
-            result = deleteUser(authorizationToken, userIdToDelete);
+            result = deleteUser(authorizationTokenWithBearer, userIdToDelete);
         });
 
         afterEach(() => {

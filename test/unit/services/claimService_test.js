@@ -40,7 +40,7 @@ describe('Unit::Service claim service', () => {
         });
     });
 
-    describe('When getting a expired authorization token on a claim, via a refresh token', () => {
+    describe('When getting an expired authorization token on a claim, via a refresh token', () => {
 
         it('it should request a claim using the refresh token provided', () => {
             Expect(requestingAClaimWithRefreshToken).calledWith(refreshToken);
@@ -59,15 +59,16 @@ describe('Unit::Service claim service', () => {
                 
             }, (err)=> {
                 Expect(err.status).to.equal(401);
-                Expect(err.message).to.equal('Unauthorised: the refresh token has expired');
+                Expect(err.message).to.equal('Unauthorised');
             })
         });
 
-        const refreshToken = 'fds456fds',
+        let refreshToken = 'fds456fds',
             claim = {
                 _id:'321',
                 authorizationToken:'token',
-                refreshToken:'fds456fds'
+                refreshToken:'fds456fds',
+                expires:"2018-01-21T11:18:54.673Z"
             }
 
         let result,
@@ -109,12 +110,14 @@ describe('Unit::Service claim service', () => {
                 Expect(authorizationToken).to.equal(authorizedClaim.authorizationToken);
             })
         });
-
+        let expires = Date;
+        expires.toISOString = function (params) {}
         const refreshToken = 'fds456fds',
             claim = {
                 _id:'321',
                 authorizationToken:'token',
                 refreshToken:'fds456fds'
+                
             },
             authorizedClaim = {
                 _id:'321',
