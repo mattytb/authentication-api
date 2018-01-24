@@ -1,5 +1,6 @@
 import * as AuthorizationService from '../../../lib/services/authorizationService';
-import { getAuthStatus, authorize } from '../../../lib/routes/authorize';
+import { getAuthorizationStatus, authorize, refreshAuthorizationToken } from '../../../lib/routes/authorize';
+import * as ClaimService from '../../../lib/services/claimService';
 import * as Chai from 'chai';
 import Sinon from 'sinon';
 
@@ -101,4 +102,94 @@ describe('Unit::Route authorize', () => {
 		});
 
 	});
+
+	describe('When a users status is authorized', () => {
+
+		it('it should set success to true on the response', () => {
+			Expect(res.body.success).to.be.true;
+		});
+
+		it('it should have a response status of 200', (done) => {
+			Expect(res.statusValue).to.equal(200);
+			done();
+		});
+	
+		beforeEach(() => {
+		 	
+			getAuthorizationStatus(req, res);
+		});
+		
+		afterEach(() => {
+		    sandbox.restore();
+		});
+	});
+
+	describe('When getting a new authorization token', () => {
+
+		it('it should request the new authorization token with the refresh token', () => {
+			Expect(requestingAuthorizationToken).calledWith(req.body.refreshToken);
+		});
+
+		it('it should set success to true on the response', () => {
+			Expect(res.body.success).to.be.true;
+		});
+
+		it('it should set the new authorization token to the response', () =>{
+			Expect(res.body.authorizationToken).to.equal(authorizationToken);
+		});
+
+
+		it('it should have a response status of 200', (done) => {
+			Expect(res.statusValue).to.equal(200);
+			done();
+		});
+
+		const authorizationToken = 'authorizationToken';
+
+		let requestingAuthorizationToken,
+			result;
+		
+		beforeEach(() => {
+			requestingAuthorizationToken = sandbox.stub(ClaimService, 'getAuthorizationTokenWithValidRefreshToken').returnsPromise();
+			requestingAuthorizationToken.resolves(authorizationToken);
+			refreshAuthorizationToken(req, res);
+		});
+		   
+		afterEach(() => {
+			sandbox.restore();
+		});
+	});
+
+	describe('When failing to get a new authorization token', () => {
+
+		it('it should request the new authorization token with the refresh token', () => {
+			Expect(requestingAuthorizationToken).calledWith(req.body.refreshToken);
+		});
+
+		it('should set message value to the error message', () => {
+			Expect(res.body.message).to.equal("Unauthorized");
+		});
+
+		it('should have a response status of 401', (done) => {
+			Expect(res.statusValue).to.equal(401);
+			done();
+		});
+		
+		let requestingAuthorizationToken,
+			result,
+			error = new Error("Unauthorized");
+			error.status = 401;
+	
+		beforeEach(() => {
+			requestingAuthorizationToken = sandbox.stub(ClaimService, 'getAuthorizationTokenWithValidRefreshToken').returnsPromise();
+			requestingAuthorizationToken.rejects(error);
+			refreshAuthorizationToken(req, res);
+		});
+		
+		afterEach(() => {
+			sandbox.restore();
+		});
+
+	});
+
 });

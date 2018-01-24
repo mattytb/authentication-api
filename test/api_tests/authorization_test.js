@@ -81,22 +81,21 @@ describe('Api::when a user registers', () => {
 
 });
   
-describe('Api::when a users authorization token has expired and they use the refresh token', () => {
+// describe('Api::when a users authorization token has expired and they use the refresh token', () => {
 
-  it('it should allow the user to refresh the authorization token with the refresh token', (done) => {
-    SuperTest(app)
-      .get(`/api/users?refreshToken=${refreshToken}`)
-      .expect("Content-type",/json/)
-      .expect(200)
-      .end(function(err,res){
-        res.status.should.equal(200);
-        res.body.payload[res.body.payload.length -1].name.should.equal('Super Test');
-        authorizationToken = res.headers.Authorization;
-        console.log(authorizationToken);
-        done();
-      });
-  });
-});
+//   it('it should allow the user to refresh the authorization token with the refresh token', (done) => {
+//     SuperTest(app)
+//       .get(`/api/users?refreshToken=${refreshToken}`)
+//       .expect("Content-type",/json/)
+//       .expect(200)
+//       .end(function(err,res){
+//         res.status.should.equal(200);
+//         res.body.payload[res.body.payload.length -1].name.should.equal('Super Test');
+//         authorizationToken = res.headers.Authorization;
+//         done();
+//       });
+//   });
+// });
 
 
 //     it('it should allow the user to login to pages requiring validation when requesting with the new token', (done) => {

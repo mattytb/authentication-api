@@ -13,9 +13,11 @@ let sandbox = Sinon.sandbox.create(),
 			res.body = obj;
 			res.statusValue = obj.status;
 		},
-		jsonAuthorized:(res, data) => { 
-			res.body = data
-		}
+		json:(obj) => { res.body = obj },
+		status:function(status) {
+			res.statusValue = status;
+        	return this;
+		},
     };
 
 describe('Unit::Route index', () => {
@@ -26,8 +28,16 @@ describe('Unit::Route index', () => {
 			Expect(requestingUsers).should.be.called;
 		});
 
+		it('it should have set the success value of the response to true', () => {
+			Expect(res.body.success).to.equal(true);
+		});
+
+		it('it should have set the status code to 200', () => {
+			Expect(res.statusValue).to.equal(200);
+		});
+
 		it('it should have set the users on the response', (done) => {
-			Expect(res.body).to.equal(users);
+			Expect(res.body.users).to.equal(users);
 			done();
 		});
 

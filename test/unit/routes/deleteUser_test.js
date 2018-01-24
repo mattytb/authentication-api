@@ -19,12 +19,12 @@ const Expect = Chai.expect,
 				res.body = obj,
 				res.statusValue = obj.status 
 			},
-			jsonAuthorized:(res, payload) => { 
-				res.body = payload 
+			json:(obj) => { res.body = obj },
+			status:function(status) {
+				res.statusValue = status;
+				return this;
 			},
-			locals: {
-
-			}
+			locals: {}
 	    };
 
 
@@ -36,8 +36,16 @@ describe('Unit::Route deleteUser', () => {
 			Expect(deletingUser).calledWith(authorizationTokenWithBearer, userIdToDelete);
 		});
 
+		it('it should have set the success value of the response to true', () => {
+			Expect(res.body.success).to.equal(true);
+		});
+
 		it('it should have set the success message on the response', () => {
-			Expect(res.body).to.equal(userDeletedMessage);
+			Expect(res.body.message).to.equal(userDeletedMessage);
+		});
+
+		it('it should have set the status code to 200', () => {
+			Expect(res.statusValue).to.equal(200);
 		});
 		
 		const authorizationTokenWithBearer = 'Bearer authorizationToken',
