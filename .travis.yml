@@ -13,4 +13,4 @@ before_install:
 services:
   - mongodb
 env:
-  - NODE_ENV=unit
+  - NODE_ENV=production
