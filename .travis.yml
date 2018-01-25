@@ -12,3 +12,5 @@ before_install:
 - openssl aes-256-cbc -K $encrypted_f4c35811067e_key -iv $encrypted_f4c35811067e_iv -in lib/config.js.enc -out lib/config.js -d
 services:
   - mongodb
+env:
+  - NODE_ENV=unit
