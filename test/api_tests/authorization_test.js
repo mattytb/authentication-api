@@ -8,14 +8,18 @@ const app = require('../../lib/server');
 
 let authorizationToken,
     userId,
-    refreshToken;   
+    refreshToken,
+    now = new Date(),
+    expires = now.setMinutes(now.getMinutes() + 30),
+    expired = now.setMinutes(now.getMinutes() - 30);  
+     
     
-describe('Api::when a user registers', () => {
+describe('Api::when a user registers and provides the correct information', () => {
 
-    it('it should return the user a claim when user supplies name, password and email and clientId', (done) => {
+    it('it should return the user a claim', (done) => {
         SuperTest(app)
         .post('/api/users')
-        .send({name : 'Super Test', password : 'Password', email : 'email@supertester.com', clientId:'test'})
+        .send({name : 'Super Test', password : 'Password', email : 'email@supertester.com', clientId:'tester', expires:expires})
         .expect("Content-type",/json/)
         .expect(200)
         .end(function(err,res){
@@ -27,41 +31,15 @@ describe('Api::when a user registers', () => {
         });
     });
 
-    it('it should not allow the user to register again when user supplies name, password and email and different client id', (done) => {
+    it('it should not allow the user to register with the registered email again', (done) => {
       SuperTest(app)
       .post('/api/users')
-      .send({'name' : 'Super Test', password : 'Password', email : 'email@supertester.com', clientId:'tester'})
+      .send({'name' : 'Super Test', password : 'Password', email : 'email@supertester.com', clientId:'tester', expires:expires})
       .expect("Content-type",/json/)
       .expect(200)
       .end(function(err,res){
         res.status.should.equal(409);
         res.body.success.should.equal(false);
-        done();
-      });
-  });
-
-  it('it should allow the user to re-authorize with their email and password', (done) => {
-    SuperTest(app)
-      .post('/api/authorize')
-      .send({email : 'email@supertester.com', password : 'Password', clientId:'tester'})
-      .expect("Content-type",/json/)
-      .expect(200)
-      .end(function(err,res){
-        res.status.should.equal(200);
-        res.body.success.should.equal(true);
-        done();
-      });
-  });
-
-  it('should allow the user to access data requiring validation when requesting with a authorizaton token', (done) => {
-    SuperTest(app)
-      .get('/api/users')
-      .set({ Authorization:`Bearer ${authorizationToken}`})
-      .expect("Content-type",/json/)
-      .expect(200)
-      .end(function(err,res){
-        res.status.should.equal(200);
-        res.body.payload[res.body.payload.length -1].name.should.equal('Super Test');
         done();
       });
   });
@@ -69,7 +47,7 @@ describe('Api::when a user registers', () => {
   it('it should not allow another user to use the newly created users email', (done) => {
     SuperTest(app)
       .post('/api/users')
-      .send({name : 'Super Test2', password : 'Password2', email : 'email@supertester.com', clientId:'tester'})
+      .send({name : 'Super Test2', password : 'Password2', email : 'email@supertester.com', clientId:'tester', expires:expires})
       .expect("Content-type",/json/)
       .expect(200)
       .end(function(err,res){
@@ -79,51 +57,124 @@ describe('Api::when a user registers', () => {
       });
   });
 
+  it('should allow the user to access data requiring authorization with the authorizaton token found on the claim', (done) => {
+    SuperTest(app)
+      .get('/api/users')
+      .set({ Authorization:`Bearer ${authorizationToken}`})
+      .expect("Content-type",/json/)
+      .expect(200)
+      .end(function(err,res){
+        res.status.should.equal(200);
+        res.body.users[res.body.users.length -1].name.should.equal('Super Test');
+        done();
+      });
+  });
+
+});
+
+describe('Api::when a user has been logged out and authorizes providing the username and password previously supplied', () => {
+
+  it('it should allow them to authorize', (done) => {
+    SuperTest(app)
+      .post('/api/authorize')
+      .send({email : 'email@supertester.com', password : 'Password', clientId:'tester', expires:expires})
+      .expect("Content-type",/json/)
+      .expect(200)
+      .end(function(err,res){
+        res.status.should.equal(200);
+        res.body.success.should.equal(true);
+        refreshToken = res.body.claim.refreshToken;
+        authorizationToken = res.body.claim.authorizationToken;
+        done();
+      });
+  });
+
+  it('it should not allow the user to authorize with an incorrect password', (done) => {
+    SuperTest(app)
+      .post('/api/authorize')
+      .send({email : 'email@supertester.com', password : 'password-wrong', clientId:'tester', expires:expires})
+      .expect("Content-type",/json/)
+      .expect(401)
+      .end(function(err,res){
+        res.status.should.equal(401);
+        res.body.success.should.equal(false);
+        done();
+      });
+  });
+
+  it('should allow the user to access data requiring authorization with the new authorizaton token found on the new claim', (done) => {
+    SuperTest(app)
+      .get('/api/users')
+      .set({ Authorization:`Bearer ${authorizationToken}`})
+      .expect("Content-type",/json/)
+      .expect(200)
+      .end(function(err,res){
+        res.status.should.equal(200);
+        res.body.users[res.body.users.length -1].name.should.equal('Super Test');
+        done();
+      });
+  });
+
+});
+describe('Api::when a user tries to access data that requires authorization', () => {
+
+  it('should not allow the user to access when requesting with a invalid authorizaton token', (done) => {
+    SuperTest(app)
+      .get('/api/users')
+      .set({ Authorization:`Bearer invalid`})
+      .expect("Content-type",/json/)
+      .expect(200)
+      .end(function(err,res){
+        res.status.should.equal(401);
+        res.body.success.should.equal(false);
+        done();
+      });
+  });
+
+  it('should not allow the user to access when requesting with a no authorizaton token', (done) => {
+    SuperTest(app)
+      .get('/api/users')
+      .expect("Content-type",/json/)
+      .expect(200)
+      .end(function(err,res){
+        res.status.should.equal(401);
+        res.body.success.should.equal(false);
+        done();
+      });
+  });
 });
   
-// describe('Api::when a users authorization token has expired and they use the refresh token', () => {
+describe('Api::when a user requests a new authorization token with a valid refresh token', () => {
 
-//   it('it should allow the user to refresh the authorization token with the refresh token', (done) => {
-//     SuperTest(app)
-//       .get(`/api/users?refreshToken=${refreshToken}`)
-//       .expect("Content-type",/json/)
-//       .expect(200)
-//       .end(function(err,res){
-//         res.status.should.equal(200);
-//         res.body.payload[res.body.payload.length -1].name.should.equal('Super Test');
-//         authorizationToken = res.headers.Authorization;
-//         done();
-//       });
-//   });
-// });
+  it('it should return a user a authorization token', (done) => {
+    SuperTest(app)
+      .post(`/api/refreshAuthorizationToken`)
+      .send({refreshToken : refreshToken})
+      .expect("Content-type",/json/)
+      .expect(200)
+      .end(function(err,res){
+        res.status.should.equal(200);
+        res.body.success.should.equal(true);
+        authorizationToken = res.body.authorizationToken;
+        done();
+      });
+  });
+
+  it('should allow the user to access data requiring authorization with the new authorizaton token', (done) => {
+    SuperTest(app)
+      .get('/api/users')
+      .set({ Authorization:`Bearer ${authorizationToken}`})
+      .expect("Content-type",/json/)
+      .expect(200)
+      .end(function(err,res){
+        res.status.should.equal(200);
+        res.body.users[res.body.users.length -1].name.should.equal('Super Test');
+        done();
+      });
+  });
+});
 
 
-//     it('it should allow the user to login to pages requiring validation when requesting with the new token', (done) => {
-//       SuperTest(app)
-//         .get('/api/users')
-//         .send({userId:userId, token:token})
-//         .expect("Content-type",/json/)
-//         .expect(200)
-//         .end(function(err,res){
-//           res.status.should.equal(200);
-//           res.body.users[res.body.users.length -1].name.should.equal('Super Test');
-//           done();
-//         });
-//     });
-
-//     it('it should not allow the user to re-authorize with incorrect password', (done) => {
-//       SuperTest(app)
-//         .post('/api/authorize')
-//         .send({email : 'email@supertester.com', password : 'password-wrong'})
-//         .expect("Content-type",/json/)
-//         .expect(401)
-//         .end(function(err,res){
-//           res.status.should.equal(401);
-//           res.body.success.should.equal(false);
-//           done();
-//         });
-//     });
-// });
 
 //   describe('Api::when a user tries to authorize and does not provide full credentials', () => {
 
