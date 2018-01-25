@@ -2,6 +2,8 @@ language: node_js
 node_js:
 - iojs
 - '7'
+services: 
+– mongodb
 install:
 - npm install -g babel-cli
 - npm install
