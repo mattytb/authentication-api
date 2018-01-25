@@ -74,6 +74,10 @@ describe('Unit::Service user service', () => {
             Expect(deletingUser).calledWith(userIdToDelete);
         });
 
+        it('should call the claim client to  all the claims', () => {
+            Expect(deletingClaims).calledWith(userIdToDelete);
+        });
+
 		it('should provide a success message stating the user had been delete', () => {
 			return result.then(data => {
                 Expect(data).to.equal(`${userIdToDelete} User was successfully deleted`);
@@ -93,6 +97,7 @@ describe('Unit::Service user service', () => {
             },
             strippingOutAuthorizationToken,
             fetchingUser,
+            deletingClaims,
             sandbox = Sinon.sandbox.create(),
             result;
 
@@ -102,6 +107,8 @@ describe('Unit::Service user service', () => {
             fetchingUser.resolves(userActioningDelete);
             deletingUser = sandbox.stub(UserClient, 'deleteUserById').returnsPromise();
             deletingUser.resolves(userIdToDelete);
+            deletingClaims = sandbox.stub(ClaimClient, 'deleteAllClaimsByClaimantId').returnsPromise();
+            deletingClaims.resolves(true);
             result = deleteUser(authorizationTokenWithBearer, userIdToDelete);
         });
 
@@ -124,6 +131,10 @@ describe('Unit::Service user service', () => {
             Expect(deletingUser).calledWith(userIdToDelete);
         });
 
+        it('should call the claim client to  all the claims', () => {
+            Expect(deletingClaims).calledWith(userIdToDelete);
+        });
+
 		it('should provide a success message stating the user had been delete', () => {
 			return result.then(data => {
                 Expect(data).to.equal(`${userIdToDelete} User was successfully deleted`);
@@ -136,6 +147,7 @@ describe('Unit::Service user service', () => {
             authorizationTokenWithBearer = 'tokenWithBearer';
 
         let deletingUser,
+            deletingClaims,
             userActioningDelete = {
                 name:'matt',
                 admin:false,
@@ -150,6 +162,8 @@ describe('Unit::Service user service', () => {
             strippingOutAuthorizationToken = sandbox.stub(AuthorizationTokenHelper, 'stripOutBearerToJustAuthorizationToken').callsFake(() => {return authorizationToken });
             fetchingUser = sandbox.stub(ClaimClient, 'getUserByAuthorizationToken').returnsPromise();
             fetchingUser.resolves(userActioningDelete);
+            deletingClaims = sandbox.stub(ClaimClient, 'deleteAllClaimsByClaimantId').returnsPromise();
+            deletingClaims.resolves(true);
             deletingUser = sandbox.stub(UserClient, 'deleteUserById').returnsPromise();
             deletingUser.resolves(userIdToDelete);
             result = deleteUser(authorizationTokenWithBearer, userIdToDelete);

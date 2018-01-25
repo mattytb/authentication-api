@@ -205,4 +205,35 @@ describe('Unit::claimClient', () => {
         });
 
     });
+
+    describe('when deleting all claims for via claimant id', () => {
+
+        it('it should call to delete all claims by id', ()=> {
+            Expect(deletingAllClaimsForClaimant).calledWith({claimant:claimantId});
+        });
+
+        it('it should return true to comfirm all found have been deleted', () => {
+            return result.then((data) => {
+                Expect(data).to.equal(true);
+            });
+        });
+
+        const claimantId = 'claimantId';
+
+        let sandbox = Sinon.sandbox.create(),
+            deletingAllClaimsForClaimant,
+            result;
+
+        beforeEach(() => {
+            deletingAllClaimsForClaimant = sandbox.stub(mongoose.Model, 'find').returns({
+                remove:sandbox.stub().returnsPromise().resolves(true)
+            })
+            result = ClaimClient.deleteAllClaimsByClaimantId(claimantId);
+        });
+
+        afterEach(function() {
+            sandbox.restore();
+        });
+
+    });
 });
