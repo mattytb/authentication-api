@@ -2,8 +2,6 @@ language: node_js
 node_js:
 - iojs
 - '7'
-services: 
-– mongodb
 install:
 - npm install -g babel-cli
 - npm install
@@ -12,3 +10,5 @@ after_success: 'nyc _mocha -g ^Unit:: --compilers js:babel-core/register --recur
   && nyc report --reporter=text-lcov | coveralls'
 before_install:
 - openssl aes-256-cbc -K $encrypted_f4c35811067e_key -iv $encrypted_f4c35811067e_iv -in lib/config.js.enc -out lib/config.js -d
+services:
+  - mongodb
