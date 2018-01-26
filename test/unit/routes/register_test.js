@@ -1,5 +1,5 @@
 import { registerUser } from '../../../lib/routes/register';
-import * as AuthenticationService from '../../../lib/services/authenticationService';
+import * as AuthorizationService from '../../../lib/services/authorizationService';
 import * as Chai from 'chai';
 import Sinon from 'sinon';
 
@@ -8,15 +8,13 @@ const Expect = Chai.expect,
 		body:{
 			name:'name',
 			password:'password',
-			email:'matt@email.com'
+			email:'matt@email.com',
+			clientId:'browser'
 		}
 	},
-	authenticatedUser = {
+	claim = {
 		name:'name',
-		password:'password',
-		email:'name@email.com',
-		webToken:'new token',
-		mobileToken:'new mobile token',
+		authorizationToken:'new token',
 		_id:"123"
 	}
 
@@ -26,43 +24,36 @@ let sandbox = Sinon.sandbox.create(),
 		status:function(status) {
 			res.statusValue = status;
         	return this;
-    	}
+    	},
+		jsonError:(obj) => { 
+			res.body = obj,
+			res.statusValue = obj.status 
+		}
     };
 
 describe('Unit::Route register', () => {
 
 	describe('When registering', () => {
 
-		it('it should call the authentication service to authenticate user with their name, password and email', () => {
-			Expect(authenticatingUser).calledWith(req.body.name, req.body.password, req.body.email);
+		it('it should call the authorization service to authorize user with their name, password, email and the client id', () => {
+			Expect(authorizingUser).calledWith(req.body.name, req.body.password, req.body.email, req.body.clientId);
 		});
-
-		it('it should have set the token on the response', () => {
-			Expect(res.body.token).to.equal(authenticatedUser.webToken);
+		it('it should have set the body success to true', () => {
+			Expect(res.body.success).to.equal(true);
 		});
-
-		it('it should have set the id of the user on the response', () => {
-			Expect(res.body.userId).to.equal(authenticatedUser._id);
+		it('it should have set the body claim', () => {
+			Expect(res.body.claim).to.equal(claim);
 		});
-
-		it('it should set success to true on the response', () => {
-			Expect(res.body.success).to.be.true;
-		});
-
-		it('it should set message to the success message on the response', () => {
-			Expect(res.body.message).to.equal('Enjoy your token!');
-		});
-
 		it('it should have a response status of 200', (done) => {
 			Expect(res.statusValue).to.equal(200);
 			done();
 		});
 
-		let authenticatingUser;
+		let authorizingUser;
 	
 		beforeEach(() => {
-		 	authenticatingUser = sandbox.stub(AuthenticationService, 'authenticateNewUser').returnsPromise();
-		 	authenticatingUser.resolves(authenticatedUser);
+		 	authorizingUser = sandbox.stub(AuthorizationService, 'authorizeNewUser').returnsPromise();
+		 	authorizingUser.resolves(claim);
 			registerUser(req, res);
 		});
 
@@ -74,11 +65,13 @@ describe('Unit::Route register', () => {
 
 	describe('When failing to register because the users email already exists, it', () => {
 
-		let authenticatingUser;
+		let authorizingUser,
+			error = new Error("message from error");
+			error.status = 409;
 	
 		beforeEach(() => {
-		 	authenticatingUser = sandbox.stub(AuthenticationService, 'authenticateNewUser').returnsPromise();
-		 	authenticatingUser.rejects(new Error("message from error"));
+		 	authorizingUser = sandbox.stub(AuthorizationService, 'authorizeNewUser').returnsPromise();
+		 	authorizingUser.rejects(error);
 			registerUser(req, res);
 		});
 
@@ -86,65 +79,18 @@ describe('Unit::Route register', () => {
 		    sandbox.restore();
 		});
 
-		it('it should attempt to call the authentication service to authenticate user with their name, password and email', () => {
-			Expect(authenticatingUser).calledWith(req.body.name, req.body.password, req.body.email);
-		});
-
-		it('should set success to false on the response', () => {
-			Expect(res.body.success).to.be.false;
+		it('it should attempt to call the authorization service to authorize user with their name, password and email', () => {
+			Expect(authorizingUser).calledWith(req.body.name, req.body.password, req.body.email, req.body.clientId);
 		});
 
 		it('should set message to the success message on the response', () => {
-			Expect(res.body.message).to.equal('message from error');
+			Expect(res.body.message).to.equal(error.message);
 		});
 
-		it('should have a response status of 409', (done) => {
-			Expect(res.statusValue).to.equal(409);
+		it('should have a response status of the error', (done) => {
+			Expect(res.statusValue).to.equal(error.status);
 			done();
 		});
-		
-	});
-
-	describe('When registering on mobile', () => {
-		
-		it('it should call the authentication service to authenticate user with their name, password and email', () => {
-			Expect(authenticatingUser).calledWith(req.body.name, req.body.password, req.body.email, req.body.fromMobile);
-		});
-
-		it('it should have set the token on the response', () => {
-			Expect(res.body.token).to.equal(authenticatedUser.mobileToken);
-		});
-
-		it('it should have set the id of the user on the response', () => {
-			Expect(res.body.userId).to.equal(authenticatedUser._id);
-		});
-
-		it('it should set success to true on the response', () => {
-			Expect(res.body.success).to.be.true;
-		});
-
-		it('it should set message to the success message on the response', () => {
-			Expect(res.body.message).to.equal('Enjoy your token!');
-		});
-
-		it('it should have a response status of 200', (done) => {
-			Expect(res.statusValue).to.equal(200);
-			done();
-		});
-
-		let authenticatingUser;
-	
-		beforeEach(() => {
-			req.body.fromMobile = true;
-			authenticatingUser = sandbox.stub(AuthenticationService, 'authenticateNewUser').returnsPromise();
-			authenticatingUser.resolves(authenticatedUser);
-			registerUser(req, res);
-		});
-
-		afterEach(() => {
-			sandbox.restore();
-		});
-
 	});
 });
 

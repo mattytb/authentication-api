@@ -21,7 +21,7 @@ describe('Unit::facebookClient', () => {
 
 		const accessToken = 'token',
 			facebookGraphUri = "https://graph.facebook.com/me",
-			parameters = "email,name,picture",
+			parameters = "email,name,picture.width(400).height(400)",
 			facebookUser = {
 				data : {
 					'name':'matt',

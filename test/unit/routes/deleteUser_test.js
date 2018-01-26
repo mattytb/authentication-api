@@ -1,7 +1,7 @@
-import { deleteUserByToken } from '../../../lib/routes/deleteUser';
+import { deleteUserByAuthorizationToken } from '../../../lib/routes/deleteUser';
 import * as Chai from 'chai';
 import Sinon from 'sinon';
-import * as UserClient from '../../../lib/clients/userClient';
+import * as UserService from '../../../lib/services/userService';
 
 const Expect = Chai.expect,
 	deletingUserFailureMessage = "failed to delete user",
@@ -15,315 +15,103 @@ const Expect = Chai.expect,
 
 	let sandbox = Sinon.sandbox.create(),
 		res = { 
+			jsonError:(obj) => { 
+				res.body = obj,
+				res.statusValue = obj.status 
+			},
 			json:(obj) => { res.body = obj },
 			status:function(status) {
 				res.statusValue = status;
-	        	return this;
-	    	}
+				return this;
+			},
+			locals: {}
 	    };
 
 
 describe('Unit::Route deleteUser', () => {
 
-	describe('When deleting a user as an admin, it', () => {
+	describe('When deleting, it', () => {
 
-		let deletingUser,
-			userActioningDelete = {
-				name:'matt',
-				admin:true,
-				_id:userIdOfUserActioningDelete
-			},
+		it('it should request to delete the user passing the authorization token and the user id to delete', () => {
+			Expect(deletingUser).calledWith(authorizationTokenWithBearer, userIdToDelete);
+		});
+
+		it('it should have set the success value of the response to true', () => {
+			Expect(res.body.success).to.equal(true);
+		});
+
+		it('it should have set the success message on the response', () => {
+			Expect(res.body.message).to.equal(userDeletedMessage);
+		});
+
+		it('it should have set the status code to 200', () => {
+			Expect(res.statusValue).to.equal(200);
+		});
+		
+		const authorizationTokenWithBearer = 'Bearer authorizationToken',
+			userIdToDelete = '123',
 			req = {
-				body:{
-					userId:userIdOfUserActioningDelete,
-				},
 				params:{
 					user_id:userIdToDelete
 				}
 			},
-			fetchingUser;
-	
+			userDeletedMessage = 'user deleted';
+		
+		let deletingUser,
+			result;
+		
 		beforeEach(() => {
-			fetchingUser = sandbox.stub(UserClient, 'getUserById').returnsPromise();
-			fetchingUser.resolves(userActioningDelete);
-		 	deletingUser = sandbox.stub(UserClient, 'deleteUser').returnsPromise();
-		 	deletingUser.resolves(userIdToDelete);
-			deleteUserByToken(req, res);
+			
+			res.locals.authorizationToken = authorizationTokenWithBearer;
+			deletingUser = sandbox.stub(UserService, 'deleteUser').returnsPromise();
+			deletingUser.resolves(userDeletedMessage);
+			result = deleteUserByAuthorizationToken(req, res);
 		});
 
 		afterEach(() => {
 		    sandbox.restore();
-		});
-
-		it('should request the user with the requesting users id', () => {
-
-			Expect(fetchingUser).calledWith(userIdOfUserActioningDelete);
-
-		});
-
-		it('should call the user client to delete', () => {
-
-			Expect(deletingUser).calledWith(userIdToDelete);
-
-		});
-
-		it('should set success to true on the response', () => {
-
-			Expect(res.body.success).to.be.true;
-
-		});
-
-		it('should set message to the success message on the response', () => {
-			
-			Expect(res.body.message).to.equal(`${successfullyDeletedMessage} ${userIdToDelete}`);
-
-		});
-
-		it('should have a response status of 200', (done) => {
-			Expect(res.statusValue).to.equal(200);
-			done();
 		});
 
 	});
 
-	describe('When deleting yourself, it', () => {
+	describe('When deleting fails', () => {
 
-		let deletingUser,
-			userActioningDelete = {
-				name:'matt',
-				admin:false,
-				_id:userIdOfUserActioningDelete
-			},
-			req = {
-				body:{
-					userId:userIdOfUserActioningDelete,
-				},
-				params:{
-					user_id:userIdOfUserActioningDelete
-				}
-			},
-			fetchingUser;
-	
-		beforeEach(() => {
-			fetchingUser = sandbox.stub(UserClient, 'getUserById').returnsPromise();
-			fetchingUser.resolves(userActioningDelete);
-		 	deletingUser = sandbox.stub(UserClient, 'deleteUser').returnsPromise();
-		 	deletingUser.resolves(userIdToDelete);
-			deleteUserByToken(req, res);
+		it('it should request to delete the user passing the authorization token and the user id to delete', () => {
+			Expect(deletingUser).calledWith(authorizationTokenWithBearer, userIdToDelete);
 		});
 
-		afterEach(() => {
-		    sandbox.restore();
-		});
-
-		it('should request the user with the requesting users id', () => {
-			Expect(fetchingUser).calledWith(userIdOfUserActioningDelete);
-		});
-
-		it('should call the user client to delete', () => {
-				Expect(deletingUser).calledWith(userIdOfUserActioningDelete);
-		});
-
-		it('should set success to true on the response', () => {
-
-			Expect(res.body.success).to.be.true;
-
-		});
-
-		it('should set the success message on the response', () => {
-			
-			Expect(res.body.message).to.equal(`${successfullyDeletedMessage} ${userIdToDelete}`);
-
-		});
-
-		it('should have a response status of 200', (done) => {
-
-			Expect(res.statusValue).to.equal(200);
-			done();
-
-		});
-
-	});
-
-	describe('When failing to delete a user because the user does not have permission to do so, it', () => {
-
-		let deletingUser,
-			userActioningDelete = {
-				name:'matt',
-				admin:false,
-				_id:userIdOfUserActioningDelete
-			},
-			req = {
-				body:{
-					userId:userIdOfUserActioningDelete,
-				},
-				params:{
-					user_id:userIdToDelete
-				}
-			},
-			fetchingUser;
-	
-		beforeEach(() => {
-			fetchingUser = sandbox.stub(UserClient, 'getUserById').returnsPromise();
-			fetchingUser.resolves(userActioningDelete);
-		 	deletingUser = sandbox.stub(UserClient, 'deleteUser').returnsPromise();
-			deleteUserByToken(req, res);
-		});
-
-		afterEach(() => {
-		    sandbox.restore();
-		});
-
-		it('should request the user with the requesting users id', () => {
-
-			Expect(fetchingUser).calledWith(userIdOfUserActioningDelete);
-
-		});
-
-		it('should not call the user client to delete', () => {
-
-			Expect(deletingUser).not.calledWith(userIdToDelete);
-
-		});
-
-		it('should set success to false on the response', () => {
-
-			Expect(res.body.success).to.be.false;
-
-		});
-
-		it('should set message on the response to the unauthorised message', () => {
-			
-			Expect(res.body.message).to.equal(unauthorisedMessage);
-
+		it('should set message value to the error message', () => {
+			Expect(res.body.message).to.equal("Unauthorized");
 		});
 
 		it('should have a response status of 401', (done) => {
 			Expect(res.statusValue).to.equal(401);
 			done();
 		});
-
-	});
-
-	describe('When failing to delete a user because the user client fails to find the user, it', () => {
-
-		let deletingUser,
-			userActioningDelete = {
-				name:'matt',
-				admin:false,
-				_id:userIdOfUserActioningDelete
-			},
+		
+		const authorizationTokenWithBearer = 'Bearer authorizationToken',
+			userIdToDelete = '123',
 			req = {
-				body:{
-					userId:userIdOfUserActioningDelete,
-				},
 				params:{
 					user_id:userIdToDelete
 				}
-			},
-			fetchingUser;
-	
+			}; 
+			
+		let deletingUser,
+			result,
+			error = new Error("Unauthorized");
+			error.status = 401;
+		
 		beforeEach(() => {
-			fetchingUser = sandbox.stub(UserClient, 'getUserById').returnsPromise();
-			fetchingUser.rejects();
-		 	deletingUser = sandbox.stub(UserClient, 'deleteUser');
-			deleteUserByToken(req, res);
+			
+			res.locals.authorizationToken = authorizationTokenWithBearer;
+			deletingUser = sandbox.stub(UserService, 'deleteUser').returnsPromise();
+			deletingUser.rejects(error);
+			result = deleteUserByAuthorizationToken(req, res);
 		});
 
 		afterEach(() => {
 		    sandbox.restore();
 		});
-
-		it('should request the user with the requesting users id', () => {
-
-			Expect(fetchingUser).calledWith(userIdOfUserActioningDelete);
-
-		});
-
-		it('should not call the user client to delete', () => {
-
-			Expect(deletingUser).not.calledWith(req.userIdToDelete);
-
-		});
-
-		it('should set success to false on the response', () => {
-
-			Expect(res.body.success).to.be.false;
-
-		});
-
-		it('should set message on the response to the server error message', () => {
-			
-			Expect(res.body.message).to.equal(serverErrorMessage);
-
-		});
-
-		it('should have a response status of 500', (done) => {
-			Expect(res.statusValue).to.equal(500);
-			done();
-		});
-
 	});
-
-	describe('When failing to delete a user because the user client fails to delete, it', () => {
-
-		let deletingUser,
-			userActioningDelete = {
-				name:'matt',
-				admin:true,
-				_id:userIdOfUserActioningDelete
-			},
-			req = {
-				body:{
-					userId:userIdOfUserActioningDelete,
-				},
-				params:{
-					user_id:userIdToDelete
-				}
-			},
-			fetchingUser;
-	
-		beforeEach(() => {
-			fetchingUser = sandbox.stub(UserClient, 'getUserById').returnsPromise();
-			fetchingUser.resolves(userActioningDelete);
-		 	deletingUser = sandbox.stub(UserClient, 'deleteUser').returnsPromise();
-		 	deletingUser.rejects();
-			deleteUserByToken(req, res);
-		});
-
-		afterEach(() => {
-		    sandbox.restore();
-		});
-
-		it('should request the user with the requesting users id', () => {
-
-			Expect(fetchingUser).calledWith(userIdOfUserActioningDelete);
-
-		});
-
-		it('should call the user client to delete', () => {
-
-			Expect(deletingUser).calledWith(userIdToDelete);
-
-		});
-
-		it('should set success to false on the response', () => {
-
-			Expect(res.body.success).to.be.false;
-
-		});
-
-		it('should set message on the response to the server error message', () => {
-			
-			Expect(res.body.message).to.equal(serverErrorMessage);
-
-		});
-
-		it('should have a response status of 500', (done) => {
-			Expect(res.statusValue).to.equal(500);
-			done();
-		});
-
-	});
-
 });

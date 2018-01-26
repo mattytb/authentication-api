@@ -2,16 +2,18 @@ import * as Chai from 'chai';
 import Sinon from 'sinon';
 import * as Token from '../../../lib/clients/tokenClient';
 import * as UserClient from '../../../lib/clients/userClient';
+import * as ClaimClient from '../../../lib/clients/claimClient';
 import * as FacebookClient from '../../../lib/clients/facebookClient';
-import * as AuthTokenService from '../../../lib/services/authTokenService';
-import * as AuthenticationService from '../../../lib/services/authenticationService';
+import * as AuthorizationTokenService from '../../../lib/services/authorizationTokenService';
+import * as AuthorizationService from '../../../lib/services/authorizationService';
+import * as ClaimService from '../../../lib/services/claimService';
+import { saveThirdPartyUser } from '../../../lib/clients/userClient';
 
 const Expect = Chai.expect;
 
+describe('Unit::Service authorization service', () => {
 
-describe('Unit::Service authentication service', () => {
-
-	describe('When authenticating a new web user', () => {
+	describe('When authorizing a new user', () => {
 
 		it('it should attempt to get a user by email', () => {
 			Expect(gettingUserByEmail).calledWith(email);
@@ -19,50 +21,76 @@ describe('Unit::Service authentication service', () => {
 
 		it('it should save a new user using name, email and password', () => {
 			Expect(savingNewUser).calledWith(name, password, email);
-		})
-
-		it('it should apply an auth token to the newly created user', () => {
-			Expect(applyingWebTokenToUser).calledWith(savedUser);
 		});
 
-		it('it should return the authenticated user', () => {
-			return result.then((user) => {
-				Expect(user).to.equal(authenticatedUser);
+		it('it should create a new claim', () => {
+			Expect(savingNewClaim).calledWith(clientId, savedUser._id);
+		});
+
+		it('it should authorize the claim', () => {
+			Expect(applyingAuthorizationTokenToClaim).calledWith(claim);
+		});
+
+		it('it should create a complete claim', () => {
+			Expect(providingCompleteClaim).calledWith(authorizedClaim, savedUser);
+		});
+
+		it('it should return the complete claim', () => {
+			return result.then((claim) => {
+				Expect(claim).to.equal(completeClaim);
 			});
 		});
 
 		const name = 'Matt',
 			email = 'matt@email.com',
 			password = 'password',
-			authenticatedToken = 'token';
+			authorizedToken = 'token',
+			clientId = 'clientId';
 
-		let authenticatingUser,
-			gettingUserByEmail,
+		let gettingUserByEmail,
 			savingNewUser,
-			applyingWebTokenToUser,
+			invokingSavingOfClaim,
+			savingNewClaim,
+			applyingAuthorizationTokenToClaim,
+			providingCompleteClaim,
 			result,
 			sandbox = Sinon.sandbox.create(),
 			savedUser = {
+				_id:'123',
 				name:'Matt',
 				email:'matt@email.com',
 				password:'password'
 			},
-			authenticatedUser = {
+			claim = {
+				_id:'321',
+				claimant:'123',
+				clientId:'clientid'
+			},
+			authorizedClaim = {
+				_id:'321',
+				claimant:'123',
+				clientId:'clientid',
+				authorizationToken:authorizedToken
+			},
+			completeClaim = {
+				refreshToken:'claimid',
 				name:'Matt',
-				email:'matt@email.com',
-				password:'password',
-				webToken:authenticatedToken,
-				_id:"123"
-			};
+				authorizationToken:'authtoken'
+			}
 			
 		beforeEach(() => {
+
 			gettingUserByEmail = sandbox.stub(UserClient, 'getUserByEmail').returnsPromise();
 			gettingUserByEmail.rejects();
 			savingNewUser = sandbox.stub(UserClient, 'saveNewUser').returnsPromise();
 			savingNewUser.resolves(savedUser);
-			applyingWebTokenToUser = sandbox.stub(AuthTokenService, 'applyAuthWebToken').returnsPromise();
-			applyingWebTokenToUser.resolves(authenticatedUser);
-			result = AuthenticationService.authenticateNewUser(name, password, email);
+			savingNewClaim = sandbox.stub(ClaimClient, 'saveNewClaim').returnsPromise();
+			savingNewClaim.resolves(claim);
+			applyingAuthorizationTokenToClaim = sandbox.stub(AuthorizationTokenService, 'applyAuthorizationToken').returnsPromise();
+			applyingAuthorizationTokenToClaim.resolves(authorizedClaim);
+			providingCompleteClaim = sandbox.stub(ClaimService, 'provideCompleteClaim').callsFake(() => {return completeClaim});
+			result = AuthorizationService.authorizeNewUser(name, password, email, clientId);
+
 		});
 
 		afterEach(() => {
@@ -71,112 +99,158 @@ describe('Unit::Service authentication service', () => {
 
 	});
 
-	describe('When authenticating a new mobile user', () => {
-		
-				it('it should attempt to get a user by email', () => {
-					Expect(gettingUserByEmail).calledWith(email);
-				});
-		
-				it('it should save a new user using name, email and password', () => {
-					Expect(savingNewUser).calledWith(name, password, email);
-				})
-		
-				it('it should apply a mobile auth token to the newly created user', () => {
-					Expect(applyingMobileTokenToUser).calledWith(savedUser);
-				});
-		
-				it('it should return the authenticated user', () => {
-					return result.then((user) => {
-						Expect(user).to.equal(authenticatedUser);
-					});
-				});
-		
-				const name = 'Matt',
-					email = 'matt@email.com',
-					password = 'password',
-					authenticatedToken = 'token';
-		
-				let authenticatingUser,
-					gettingUserByEmail,
-					savingNewUser,
-					applyingMobileTokenToUser,
-					result,
-					sandbox = Sinon.sandbox.create(),
-					savedUser = {
-						name:'Matt',
-						email:'matt@email.com',
-						password:'password'
-					},
-					authenticatedUser = {
-						name:'Matt',
-						email:'matt@email.com',
-						password:'password',
-						mobileToken:authenticatedToken,
-						_id:"123"
-					};
-					
-				beforeEach(() => {
-					gettingUserByEmail = sandbox.stub(UserClient, 'getUserByEmail').returnsPromise();
-					gettingUserByEmail.rejects();
-					savingNewUser = sandbox.stub(UserClient, 'saveNewUser').returnsPromise();
-					savingNewUser.resolves(savedUser);
-					applyingMobileTokenToUser = sandbox.stub(AuthTokenService, 'applyAuthMobileToken').returnsPromise();
-					applyingMobileTokenToUser.resolves(authenticatedUser);
-					result = AuthenticationService.authenticateNewUser(name, password, email, true);
-				});
-		
-				afterEach(() => {
-					sandbox.restore();
-				});
-		
-			});
+	describe('When authorizing a new user but a user is found', () => {
 
-	describe('When re-authenticating a web user', () => {
-
-		it('it should get a user by email and password', () => {
-			Expect(gettingUserByEmailAndPassword).calledWith(email, password);
+		it('it should attempt to get a user by email', () => {
+			Expect(gettingUserByEmail).calledWith(email);
 		});
 
-		it('it should apply an auth token to the newly created user', () => {
-			Expect(applyingWebTokenToUser).calledWith(user);
+		it('it should not attempt save a new user using name, email and password', () => {
+			Expect(savingNewUser).not.calledWith(name, password, email);
 		});
 
-		it('it should return the authenticated user', () => {
+		it('it should not create a new claim', () => {
+			Expect(savingNewClaim).not.calledWith(clientId, user._id);
+		});
+
+		it('it should not authorize the claim', () => {
+			Expect(applyingAuthorizationTokenToClaim).not.calledWith(claim);
+		});
+
+		it('it should not create a complete claim', () => {
+			Expect(providingCompleteClaim).not.calledWith(authorizedClaim, user);
+		});
+
+		it('it should reject with an error and status of 409', () => {
 			return result.then((user) => {
-				Expect(user).to.equal(authenticatedUser);
+			},
+			(error) => {
+				Expect(error.message).to.equal("A user already exists with this email");
+				Expect(error.status).to.equal(409);
 			});
 		});
 
 		const name = 'Matt',
 			email = 'matt@email.com',
-			password = 'password';
+			password = 'password',
+			authorizedToken = 'token',
+			clientId = 'clientId';
 
-		let authenticatingUser,
+		let gettingUserByEmail,
+			savingNewUser,
+			invokingSavingOfClaim,
+			savingNewClaim,
+			applyingAuthorizationTokenToClaim,
+			providingCompleteClaim,
+			result,
+			sandbox = Sinon.sandbox.create(),
+			user = {
+				_id:'123',
+				name:'Matt',
+				email:'matt@email.com',
+				password:'password'
+			},
+			authorizedClaim = {
+				_id:'321'
+			},
+			claim = {
+				_id:'321'
+			}
+			
+		beforeEach(() => {
+			gettingUserByEmail = sandbox.stub(UserClient, 'getUserByEmail').returnsPromise();
+			gettingUserByEmail.resolves(user);
+			savingNewUser = sandbox.stub(UserClient, 'saveNewUser').returnsPromise();
+			savingNewClaim = sandbox.stub(ClaimClient, 'saveNewClaim').returnsPromise();
+			applyingAuthorizationTokenToClaim = sandbox.stub(AuthorizationTokenService, 'applyAuthorizationToken').returnsPromise();
+			providingCompleteClaim = sandbox.stub(ClaimService, 'provideCompleteClaim').callsFake();
+			result = AuthorizationService.authorizeNewUser(name, password, email, clientId);
+		});
+
+		afterEach(() => {
+			sandbox.restore();
+		});
+
+	});
+
+	describe('When re-authorizing a user', () => {
+
+		it('it should get a user by email and password', () => {
+			Expect(gettingUserByEmailAndPassword).calledWith(email, password);
+		});
+
+		it('it should delete any claims made from this user and the given clientId', () => {
+			Expect(deletingClaim).calledWith(user._id, clientId);
+		});
+
+		it('it should create a new claim', () => {
+			Expect(creatingNewClaim).calledWith(clientId, user._id)
+		});
+
+		it('it should apply a authorization token to the claim', () => {
+			Expect(applyingAuthorizationTokenToClaim).calledWith(claim)
+		});
+
+		it('it should create a complete claim', () => {
+			Expect(providingCompleteClaim).calledWith(authorizedClaim, user);
+		});
+
+		it('it should return the complete claim', () => {
+			return result.then((claim) => {
+				Expect(claim).to.equal(completeClaim);
+			});
+		});
+
+		const name = 'Matt',
+			email = 'matt@email.com',
+			password = 'password',
+			clientId = 'clientId',
+			authorizedToken = 'token';
+
+		let authorizingUser,
 			gettingUserByEmailAndPassword,
-			applyingWebTokenToUser,
+			deletingClaim,
+			creatingNewClaim,
+			applyingAuthorizationTokenToClaim,
+			providingCompleteClaim,
 			result,
 			sandbox = Sinon.sandbox.create(),
 			user = {
 				name:'Matt',
 				email:'matt@email.com',
 				password:'password',
-				webToken:'token',
 				_id:"123"
 			},
-			authenticatedUser = {
+			claim = {
+				_id:'321',
+				claimant:'123',
+				clientId:'clientid'
+			},
+			authorizedClaim = {
+				_id:'321',
+				claimant:'123',
+				clientId:'clientid',
+				authorizationToken:authorizedToken
+			},
+			completeClaim = {
+				refreshToken:'claimid',
 				name:'Matt',
-				email:'matt@email.com',
-				password:'password',
-				webToken:'newtoken',
-				_id:"123"
-			};
+				authorizationToken:'authtoken'
+			}
 			
 		beforeEach(() => {
+
 			gettingUserByEmailAndPassword = sandbox.stub(UserClient, 'getUserByEmailAndPassword').returnsPromise();
 			gettingUserByEmailAndPassword.resolves(user);
-			applyingWebTokenToUser = sandbox.stub(AuthTokenService, 'applyAuthWebToken').returnsPromise();
-			applyingWebTokenToUser.resolves(authenticatedUser);
-			result = AuthenticationService.authenticateUser(email, password);
+			deletingClaim = sandbox.stub(ClaimClient, 'deleteClaimByClaimantAndClientId').returnsPromise();
+			deletingClaim.resolves(true);
+			creatingNewClaim = sandbox.stub(ClaimClient, 'saveNewClaim').returnsPromise();
+			creatingNewClaim.resolves(claim);
+			applyingAuthorizationTokenToClaim = sandbox.stub(AuthorizationTokenService, 'applyAuthorizationToken').returnsPromise();
+			applyingAuthorizationTokenToClaim.resolves(authorizedClaim);
+			providingCompleteClaim = sandbox.stub(ClaimService, 'provideCompleteClaim').callsFake(() => {return completeClaim});
+			result = AuthorizationService.authorizeUser(email, password, clientId);
+
 		});
 
 		afterEach(() => {
@@ -185,267 +259,96 @@ describe('Unit::Service authentication service', () => {
 
 	});
 
-	describe('When re-authenticating a mobile user', () => {
-		
-				it('it should get a user by email and password', () => {
-					Expect(gettingUserByEmailAndPassword).calledWith(email, password);
-				});
-		
-				it('it should apply an auth token to the newly created user', () => {
-					Expect(applyingMobileTokenToUser).calledWith(user);
-				});
-		
-				it('it should return the authenticated user', () => {
-					return result.then((user) => {
-						Expect(user).to.equal(authenticatedUser);
-					});
-				});
-		
-				const name = 'Matt',
-					email = 'matt@email.com',
-					password = 'password';
-		
-				let authenticatingUser,
-					gettingUserByEmailAndPassword,
-					applyingMobileTokenToUser,
-					result,
-					sandbox = Sinon.sandbox.create(),
-					user = {
-						name:'Matt',
-						email:'matt@email.com',
-						password:'password',
-						webToken:'token',
-						mobileToken:'mobileToken',
-						_id:"123"
-					},
-					authenticatedUser = {
-						name:'Matt',
-						email:'matt@email.com',
-						password:'password',
-						webToken:'newtoken',
-						mobileToken:'newmobiletoken',
-						_id:"123"
-					};
-					
-				beforeEach(() => {
-					gettingUserByEmailAndPassword = sandbox.stub(UserClient, 'getUserByEmailAndPassword').returnsPromise();
-					gettingUserByEmailAndPassword.resolves(user);
-					applyingMobileTokenToUser = sandbox.stub(AuthTokenService, 'applyAuthMobileToken').returnsPromise();
-					applyingMobileTokenToUser.resolves(authenticatedUser);
-					result = AuthenticationService.authenticateUser(email, password, true);
-				});
-		
-				afterEach(() => {
-					sandbox.restore();
-				});
-		
-			});
+	describe('When authorizing a new facebook user', () => {
 
-	describe("When authenticating a new Facebook user", () => {
-
-		it("it should get the Facebook user with the access token supplied", () => {
-			Expect(gettingFacebookUser).calledWith(accessToken);
+		it('it should get the facebook user with the access token and client id', () =>{
+			Expect(gettingFacebookUserByToken).calledWith(accessToken, clientId);
 		});
 
-		it("it should enquire to see if the facebook user already exists in the database", () => {
-			Expect(checkingForUser).calledWith(facebookUser.email);
+		it('it should attempt to get the user from the users email', () => {
+			Expect(gettingUserByEmail).calledWith(facebookUserDetails.email);
 		});
 
-		it("it should request the new facebook user be saved", () => {
-			Expect(savingNewUser).calledWith(facebookUser.name, facebookUser.email, facebookUser.picture.data.url);
+		it('it should request a new user be saved', () => {
+			Expect(savingThirdPartyUser).calledWith(facebookUserDetails.name, facebookUserDetails.email, facebookUserDetails.picture.data.url);
 		});
 
-		it('it should apply an auth token to the newly created user', () => {
-			Expect(applyingWebTokenToUser).calledWith(savedUser);
+		it('it should create a new claim', () => {
+			Expect(creatingNewClaim).calledWith(clientId, user._id);
 		});
 
-		it("it should return the new authenticated user", () => {
-			return result.then((user) => {
-				Expect(user).to.equal(authenticatedUser);
+		it('it should authorize the claim', () => {
+			Expect(applyingAuthorizationToken).calledWith(claim);
+		});
+
+		it('it should create a complete claim', () => {
+			Expect(providingCompleteClaim).calledWith(authorizedClaim, user);
+		});
+
+		it('it should return the complete claim', () => {
+			return result.then((claim) => {
+				Expect(claim).to.equal(completeClaim);
 			});
 		});
 
-		const accessToken = "accessToken";
+		const facebookUserDetails = {
+			
+			'name':'matt',
+			'email':'matt@email.com',
+			'picture':{ 
+				data: {
+					url:"image.src"
+				}
+			}
+			
+		},
+		user = {
+			'name':'matt',
+			'email':'matt@email.com',
+			'_id':'123'	
+		},
+		accessToken = 'accesstoken',
+		authorizedToken = 'token',
+		clientId = 'clientid',
+		claim = {
+			_id:'321',
+			claimant:'123',
+			clientId:'clientid'
+		},
+		authorizedClaim = {
+			_id:'321',
+			claimant:'123',
+			clientId:'clientid',
+			authorizationToken:authorizedToken
+		},
+		completeClaim = {
+			refreshToken:'claimid',
+			name:'Matt',
+			authorizationToken:'authtoken'
+		}
 
-		let gettingFacebookUser,
-			checkingForUser,
-			savingNewUser,
-			applyingWebTokenToUser,
-			facebookUser = {
-				'name':'matt',
-				'email':'matt@email.com',
-				'picture':
-					{ 
-						data: {
-							url:"image.src"
-						}
-					}
-			},
-			savedUser = {
-				name:'facebook user',
-				email:'facebook@user.com',
-				_id:"123"
-			},
-			authenticatedUser = {
-				name:'facebook user',
-				email:'facebook@user.com',
-				_id:"123",
-				webToken:'token'
-			},
-			result,
-			sandbox = Sinon.sandbox.create();
+		let result,
+		gettingFacebookUserByToken,
+		gettingUserByEmail,
+		creatingNewClaim,
+		savingThirdPartyUser,
+		applyingAuthorizationToken,
+		providingCompleteClaim,
+		sandbox = Sinon.sandbox.create();
 
 		beforeEach(() => {
-
-			gettingFacebookUser = sandbox.stub(FacebookClient, 'getFacebookUser').returnsPromise();
-			gettingFacebookUser.resolves(facebookUser);
-			checkingForUser = sandbox.stub(UserClient, 'getUserByEmail').returnsPromise();
-			checkingForUser.rejects();
-			savingNewUser = sandbox.stub(UserClient, 'saveThirdPartyUser').returnsPromise();
-			savingNewUser.resolves(savedUser);
-			applyingWebTokenToUser = sandbox.stub(AuthTokenService, 'applyAuthWebToken').returnsPromise();
-			applyingWebTokenToUser.resolves(authenticatedUser);
-
-			result = AuthenticationService.authenticateFacebookUser(accessToken);
-		});
-
-		afterEach(() => {
-			sandbox.restore();
-		});
-
-	});
-
-	describe("When authenticating a new mobile Facebook user", () => {
-		
-				it("it should get the Facebook user with the access token supplied", () => {
-					Expect(gettingFacebookUser).calledWith(accessToken);
-				});
-		
-				it("it should enquire to see if the facebook user already exists in the database", () => {
-					Expect(checkingForUser).calledWith(facebookUser.email);
-				});
-				
-				it("it should request the new facebook user be saved", () => {
-					Expect(savingNewUser).calledWith(facebookUser.name, facebookUser.email, facebookUser.picture.data.url);
-				});
-		
-				it('it should apply an mobile auth token to the newly created user', () => {
-					Expect(applyingMobileTokenToUser).calledWith(savedUser);
-				});
-		
-				it("it should return the new authenticated user", () => {
-					return result.then((user) => {
-						Expect(user).to.equal(authenticatedUser);
-					});
-				});
-		
-				const accessToken = "accessToken";
-		
-				let gettingFacebookUser,
-					checkingForUser,
-					savingNewUser,
-					applyingMobileTokenToUser,
-					facebookUser = {
-						'name':'matt',
-						'email':'matt@email.com',
-						'picture':
-						{ 
-							data: {
-								url:"image.src"
-							}
-						}
-					},
-					savedUser = {
-						name:'facebook user',
-						email:'facebook@user.com',
-						_id:"123"
-					},
-					authenticatedUser = {
-						name:'facebook user',
-						email:'facebook@user.com',
-						_id:"123",
-						webToken:'token',
-						mobileToken:'mobile token'
-					},
-					result,
-					sandbox = Sinon.sandbox.create();
-		
-				beforeEach(() => {
-		
-					gettingFacebookUser = sandbox.stub(FacebookClient, 'getFacebookUser').returnsPromise();
-					gettingFacebookUser.resolves(facebookUser);
-					checkingForUser = sandbox.stub(UserClient, 'getUserByEmail').returnsPromise();
-					checkingForUser.rejects();
-					savingNewUser = sandbox.stub(UserClient, 'saveThirdPartyUser').returnsPromise();
-					savingNewUser.resolves(savedUser);
-					applyingMobileTokenToUser = sandbox.stub(AuthTokenService, 'applyAuthMobileToken').returnsPromise();
-					applyingMobileTokenToUser.resolves(authenticatedUser);
-		
-					result = AuthenticationService.authenticateFacebookUser(accessToken, true);
-				});
-		
-				afterEach(() => {
-					sandbox.restore();
-				});
-		
-			});
-
-	describe("When authenticating a already registered Facebook user and there auth token is still valid", () => {
-
-		it("it should get the Facebook user with the access token supplied", () => {
-			Expect(gettingFacebookUser).calledWith(accessToken);
-		});
-
-		it("it should enquire to see if the facebook user already exists in the database", () => {
-			Expect(checkingForUser).calledWith(facebookUser.email);
-		});
-
-		it("it should check the validaty of the authentication web token", () => {
-			Expect(verifyingAuthToken).calledWith(user.webToken);
-		});
-
-		it("it should return the user with a new token", () => {
-			return result.then((user) => {
-				Expect(user).to.equal(user);
-			});
-		});
-
-		const accessToken = "accessToken";
-
-		let gettingFacebookUser,
-			checkingForUser,
-			applyingWebTokenToUser,
-			verifyingAuthToken,
-			facebookUser = {
-				name:'facebook user',
-				email:'facebook@user.com'
-			},
-			user = {
-				name:'facebook user',
-				email:'facebook@user.com',
-				_id:"123",
-				webToken:'token'
-			},
-			authenticatedUser = {
-				name:'facebook user',
-				email:'facebook@user.com',
-				_id:"123",
-				webToken:'new token'
-			},
-			result,
-			sandbox = Sinon.sandbox.create();
-
-		beforeEach(() => {
-
-			gettingFacebookUser = sandbox.stub(FacebookClient, 'getFacebookUser').returnsPromise();
-			gettingFacebookUser.resolves(facebookUser);
-			checkingForUser = sandbox.stub(UserClient, 'getUserByEmail').returnsPromise();
-			checkingForUser.resolves(user);
-			verifyingAuthToken = sandbox.stub(Token, 'verifyToken').returnsPromise();
-			verifyingAuthToken.resolves(true);
-			applyingWebTokenToUser = sandbox.stub(AuthTokenService, 'applyAuthWebToken').returnsPromise();
-			applyingWebTokenToUser.resolves(authenticatedUser);
-			result = AuthenticationService.authenticateFacebookUser(accessToken);
+			gettingFacebookUserByToken = sandbox.stub(FacebookClient, 'getFacebookUser').returnsPromise();
+			gettingFacebookUserByToken.resolves(facebookUserDetails);
+			gettingUserByEmail = sandbox.stub(UserClient, 'getUserByEmail').returnsPromise();
+			gettingUserByEmail.rejects();
+			savingThirdPartyUser = sandbox.stub(UserClient, 'saveThirdPartyUser').returnsPromise();
+			savingThirdPartyUser.resolves(user);
+			creatingNewClaim = sandbox.stub(ClaimClient, 'saveNewClaim').returnsPromise();
+			creatingNewClaim.resolves(claim);
+			applyingAuthorizationToken = sandbox.stub(AuthorizationTokenService, 'applyAuthorizationToken').returnsPromise();
+			applyingAuthorizationToken.resolves(authorizedClaim);
+			providingCompleteClaim = sandbox.stub(ClaimService, 'provideCompleteClaim').callsFake(() => {return completeClaim});
+			result = AuthorizationService.authorizeFacebookUser(accessToken, clientId);
 		});
 
 		afterEach(() => {
@@ -453,207 +356,103 @@ describe('Unit::Service authentication service', () => {
 		});
 	});
 
-	describe("When authenticating an already registered Facebook mobile user and there auth token is still valid", () => {
-		
-		it("it should get the Facebook user with the access token supplied", () => {
-			Expect(gettingFacebookUser).calledWith(accessToken);
+	describe('When re-authorizing a facebook user', () => {
+
+		it('it should get the facebook user with the access token and client id', () =>{
+			Expect(gettingFacebookUserByToken).calledWith(accessToken, clientId);
 		});
 
-		it("it should enquire to see if the facebook user already exists in the database", () => {
-			Expect(checkingForUser).calledWith(facebookUser.email);
+		it('it should attempt to get the user from the users email', () => {
+			Expect(gettingUserByEmail).calledWith(facebookUserDetails.email);
 		});
 
-		it("it should check the validaty of the authentication web token", () => {
-			Expect(verifyingAuthToken).calledWith(user.mobileToken);
-		});
-
-		it("it should return the user with a new token", () => {
-			return result.then((user) => {
-				Expect(user).to.equal(user);
-			});
-		});
-
-		const accessToken = "accessToken";
-
-		let gettingFacebookUser,
-			checkingForUser,
-			applyingWebTokenToUser,
-			verifyingAuthToken,
-			facebookUser = {
-				name:'facebook user',
-				email:'facebook@user.com'
-			},
-			user = {
-				name:'facebook user',
-				email:'facebook@user.com',
-				_id:"123",
-				webToken:'token',
-				mobileToken:"mobile token"
-			},
-			authenticatedUser = {
-				name:'facebook user',
-				email:'facebook@user.com',
-				_id:"123",
-				webToken:'new token',
-				mobileToken:'new mobile token'
-			},
-			result,
-			sandbox = Sinon.sandbox.create();
-
-		beforeEach(() => {
-
-			gettingFacebookUser = sandbox.stub(FacebookClient, 'getFacebookUser').returnsPromise();
-			gettingFacebookUser.resolves(facebookUser);
-			checkingForUser = sandbox.stub(UserClient, 'getUserByEmail').returnsPromise();
-			checkingForUser.resolves(user);
-			verifyingAuthToken = sandbox.stub(Token, 'verifyToken').returnsPromise();
-			verifyingAuthToken.resolves(true);
-			applyingWebTokenToUser = sandbox.stub(AuthTokenService, 'applyAuthMobileToken').returnsPromise();
-			applyingWebTokenToUser.resolves(authenticatedUser);
-			result = AuthenticationService.authenticateFacebookUser(accessToken, true);
-		});
-
-		afterEach(() => {
-			sandbox.restore();
-		});
-	});
-
-	describe("When authenticating an already registered Facebook user and thier auth token is not valid", () => {
-
-		it("it should get the Facebook user with the access token supplied", () => {
-			Expect(gettingFacebookUser).calledWith(accessToken);
-		});
-
-		it("it should enquire to see if the facebook user already exists in the database", () => {
-			Expect(checkingForUser).calledWith(facebookUser.email);
-		});
-
-		it("it should check the validaty of the authentication web token", () => {
-				Expect(verifyingAuthToken).calledWith(user.webToken);
+		it('should delete old claim using client id and user id', ()=> {
+			Expect(deletingClaim).calledWith(user._id, clientId);
 		})
 
-		it("it should request the re authentication of the user found", () => {
-			Expect(applyingWebTokenToUser).calledWith(user);
+		it('it should create a new claim', () => {
+			Expect(creatingNewClaim).calledWith(clientId, user._id);
 		});
 
-		it("it should return the user with a new token", () => {
-			return result.then((user) => {
-				Expect(user).to.equal(authenticatedUser);
+		it('it should authorize the claim', () => {
+			Expect(applyingAuthorizationToken).calledWith(claim);
+		});
+
+		it('it should create a complete claim', () => {
+			Expect(providingCompleteClaim).calledWith(authorizedClaim, user);
+		});
+
+		it('it should return the complete claim', () => {
+			return result.then((claim) => {
+				Expect(claim).to.equal(completeClaim);
 			});
 		});
 
-		const accessToken = "accessToken";
+		const facebookUserDetails = {
+			
+			'name':'matt',
+			'email':'matt@email.com',
+			'picture':{ 
+				data: {
+					url:"image.src"
+				}
+			}
+			
+		},
+		user = {
+			'name':'matt',
+			'email':'matt@email.com',
+			'_id':'123'	
+		},
+		accessToken = 'accesstoken',
+		authorizedToken = 'token',
+		clientId = 'clientid',
+		claim = {
+			_id:'321',
+			claimant:'123',
+			clientId:'clientid'
+		},
+		authorizedClaim = {
+			_id:'321',
+			claimant:'123',
+			clientId:'clientid',
+			authorizationToken:authorizedToken
+		},
+		completeClaim = {
+			refreshToken:'claimid',
+			name:'Matt',
+			authorizationToken:'authtoken'
+		}
 
-		let gettingFacebookUser,
-			checkingForUser,
-			applyingWebTokenToUser,
-			verifyingAuthToken,
-			facebookUser = {
-				name:'facebook user',
-				email:'facebook@user.com'
-			},
-			user = {
-				name:'facebook user',
-				email:'facebook@user.com',
-				_id:"123",
-				webToken:'token'
-			},
-			authenticatedUser = {
-				name:'facebook user',
-				email:'facebook@user.com',
-				_id:"123",
-				webToken:'new token'
-			},
-			result,
-			sandbox = Sinon.sandbox.create();
+		let result,
+		gettingFacebookUserByToken,
+		gettingUserByEmail,
+		deletingClaim,
+		creatingNewClaim,
+		savingThirdPartyUser,
+		applyingAuthorizationToken,
+		providingCompleteClaim,
+		sandbox = Sinon.sandbox.create();
 
 		beforeEach(() => {
-
-			gettingFacebookUser = sandbox.stub(FacebookClient, 'getFacebookUser').returnsPromise();
-			gettingFacebookUser.resolves(facebookUser);
-			checkingForUser = sandbox.stub(UserClient, 'getUserByEmail').returnsPromise();
-			checkingForUser.resolves(user);
-			verifyingAuthToken = sandbox.stub(Token, 'verifyToken').returnsPromise();
-			verifyingAuthToken.rejects();
-			applyingWebTokenToUser = sandbox.stub(AuthTokenService, 'applyAuthWebToken').returnsPromise();
-			applyingWebTokenToUser.resolves(authenticatedUser);
-			result = AuthenticationService.authenticateFacebookUser(accessToken);
-
+			gettingFacebookUserByToken = sandbox.stub(FacebookClient, 'getFacebookUser').returnsPromise();
+			gettingFacebookUserByToken.resolves(facebookUserDetails);
+			gettingUserByEmail = sandbox.stub(UserClient, 'getUserByEmail').returnsPromise();
+			gettingUserByEmail.resolves(user);
+			deletingClaim = sandbox.stub(ClaimClient, 'deleteClaimByClaimantAndClientId').returnsPromise();
+			deletingClaim.resolves(true);
+			creatingNewClaim = sandbox.stub(ClaimClient, 'saveNewClaim').returnsPromise();
+			creatingNewClaim.resolves(claim);
+			applyingAuthorizationToken = sandbox.stub(AuthorizationTokenService, 'applyAuthorizationToken').returnsPromise();
+			applyingAuthorizationToken.resolves(authorizedClaim);
+			providingCompleteClaim = sandbox.stub(ClaimService, 'provideCompleteClaim').callsFake(() => {return completeClaim});
+			result = AuthorizationService.authorizeFacebookUser(accessToken, clientId);
 		});
 
 		afterEach(() => {
 			sandbox.restore();
 		});
-	});
 
-	describe("When authenticating an already registered Facebook mobile user and thier auth token is not valid", () => {
-		
-		it("it should get the Facebook user with the access token supplied", () => {
-			Expect(gettingFacebookUser).calledWith(accessToken);
-		});
-
-		it("it should enquire to see if the facebook user already exists in the database", () => {
-			Expect(checkingForUser).calledWith(facebookUser.email);
-		});
-
-		it("it should check the validaty of the authentication web token", () => {
-				Expect(verifyingAuthToken).calledWith(user.mobileToken);
-		})
-
-		it("it should request the re authentication of the user found", () => {
-			Expect(applyingWebTokenToUser).calledWith(user);
-		});
-
-		it("it should return the user with a new token", () => {
-			return result.then((user) => {
-				Expect(user).to.equal(authenticatedUser);
-			});
-		});
-
-		const accessToken = "accessToken";
-
-		let gettingFacebookUser,
-			checkingForUser,
-			applyingWebTokenToUser,
-			verifyingAuthToken,
-			facebookUser = {
-				name:'facebook user',
-				email:'facebook@user.com'
-			},
-			user = {
-				name:'facebook user',
-				email:'facebook@user.com',
-				_id:"123",
-				webToken:'token',
-				mobileToken:'mobile token'
-			},
-			authenticatedUser = {
-				name:'facebook user',
-				email:'facebook@user.com',
-				_id:"123",
-				webToken:'new token',
-				mobileToken:'new mobile token'
-			},
-			result,
-			sandbox = Sinon.sandbox.create();
-
-		beforeEach(() => {
-
-			gettingFacebookUser = sandbox.stub(FacebookClient, 'getFacebookUser').returnsPromise();
-			gettingFacebookUser.resolves(facebookUser);
-			checkingForUser = sandbox.stub(UserClient, 'getUserByEmail').returnsPromise();
-			checkingForUser.resolves(user);
-			verifyingAuthToken = sandbox.stub(Token, 'verifyToken').returnsPromise();
-			verifyingAuthToken.rejects();
-			applyingWebTokenToUser = sandbox.stub(AuthTokenService, 'applyAuthMobileToken').returnsPromise();
-			applyingWebTokenToUser.resolves(authenticatedUser);
-			result = AuthenticationService.authenticateFacebookUser(accessToken, true);
-
-		});
-
-		afterEach(() => {
-			sandbox.restore();
-		});
 	});
 });
 
