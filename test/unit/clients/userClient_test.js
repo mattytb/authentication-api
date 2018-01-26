@@ -11,7 +11,6 @@ const Expect = Chai.expect;
 
 describe('Unit::userClient', () => {
 
-	
 	describe('When getting user by email', () => {
 
 		it('it should request the user by email', () => {
@@ -45,7 +44,6 @@ describe('Unit::userClient', () => {
 		afterEach(function() {
 			sandbox.restore();
 		});
-
 	});
 	
 	describe('When successfully getting user by id', () => {
@@ -53,7 +51,6 @@ describe('Unit::userClient', () => {
 		it('it should request user by id', () => {
 			Expect(gettingUserById).calledWith(id);
 		});
-
 
 		it('it should return the user', () => {
 			return result.then((data) =>{
@@ -81,6 +78,7 @@ describe('Unit::userClient', () => {
 		afterEach(function() {
 			sandbox.restore();
 		});
+		
 	});
 	
 
@@ -248,7 +246,6 @@ describe('Unit::userClient', () => {
 		});
 
 	});
-
 
 	describe('When successfully getting users', () => {
 
