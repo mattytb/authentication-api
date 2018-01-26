@@ -45,7 +45,7 @@
     "build": "babel lib -d dist",
     "serve": "node dist/server.js",
     "start": "node dist/server.js",
-    "unit": "NODE_ENV=unit mocha -g ^Unit:: --compilers js:babel-core/register --recursive",
+    "unit": "mocha -g ^Unit:: --compilers js:babel-core/register --recursive",
     "api": "mocha -g ^Api:: --compilers js:babel-core/register --recursive",
     "cover": "nyc mocha --compilers js:babel-core/register --recursive",
     "snyk-protect": "snyk protect",

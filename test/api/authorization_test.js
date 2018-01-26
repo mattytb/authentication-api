@@ -4,7 +4,7 @@ import Should from 'should';
 import express from 'express';
 import Config from '../../lib/config';
 
-const server = SuperTest.agent('http://localhost:75');
+const app = require('../../lib/server');
 
 let authorizationToken,
     userId,
@@ -17,7 +17,7 @@ let authorizationToken,
 describe('Api::when a user registers and provides the correct information', () => {
 
     it('it should return the user a claim', (done) => {
-      server
+      SuperTest(app)
         .post('/api/users')
         .send({name : 'Super Test', password : 'Password', email : 'email@supertester.com', clientId:'tester', expires:expires})
         .expect("Content-type",/json/)
@@ -33,7 +33,7 @@ describe('Api::when a user registers and provides the correct information', () =
     });
 
     it('it should not allow the user to register with the registered email again', (done) => {
-      server
+      SuperTest(app)
       .post('/api/users')
       .send({'name' : 'Super Test', password : 'Password', email : 'email@supertester.com', clientId:'tester', expires:expires})
       .expect("Content-type",/json/)
@@ -46,7 +46,7 @@ describe('Api::when a user registers and provides the correct information', () =
   });
 
   it('it should not allow a different user to use the same email', (done) => {
-    server
+    SuperTest(app)
       .post('/api/users')
       .send({name : 'Super Test2', password : 'Password2', email : 'email@supertester.com', clientId:'tester', expires:expires})
       .expect("Content-type",/json/)
@@ -59,7 +59,7 @@ describe('Api::when a user registers and provides the correct information', () =
   });
 
   it('should allow access to data requiring authorization with the new authorizaton token found on the claim', (done) => {
-    server
+    SuperTest(app)
       .get('/api/users')
       .set({ Authorization:`Bearer ${authorizationToken}`})
       .expect("Content-type",/json/)
@@ -76,7 +76,7 @@ describe('Api::when a user registers and provides the correct information', () =
 describe('Api::when a user has been logged out and provides the username and password they previously supplied', () => {
 
   it('it should allow them to authorize', (done) => {
-    server
+    SuperTest(app)
       .post('/api/authorize')
       .send({email : 'email@supertester.com', password : 'Password', clientId:'tester', expires:expires})
       .expect("Content-type",/json/)
@@ -91,7 +91,7 @@ describe('Api::when a user has been logged out and provides the username and pas
   });
 
   it('it should not allow the user to authorize with an incorrect password', (done) => {
-    server
+    SuperTest(app)
       .post('/api/authorize')
       .send({email : 'email@supertester.com', password : 'password-wrong', clientId:'tester', expires:expires})
       .expect("Content-type",/json/)
@@ -104,7 +104,7 @@ describe('Api::when a user has been logged out and provides the username and pas
   });
 
   it('should allow access to the data requiring authorization with the authorizaton token found on the new claim provided', (done) => {
-    server
+    SuperTest(app)
       .get('/api/users')
       .set({ Authorization:`Bearer ${authorizationToken}`})
       .expect("Content-type",/json/)
@@ -121,7 +121,7 @@ describe('Api::when a user has been logged out and provides the username and pas
 describe('Api::when a user tries to access data that requires authorization', () => {
 
   it('it should not allow the user access with a invalid authorizaton token', (done) => {
-    server
+    SuperTest(app)
       .get('/api/users')
       .set({ Authorization:`Bearer invalid`})
       .expect("Content-type",/json/)
@@ -134,7 +134,7 @@ describe('Api::when a user tries to access data that requires authorization', ()
   });
 
   it('it should not allow the user access with a no authorizaton token', (done) => {
-    server
+    SuperTest(app)
       .get('/api/users')
       .expect("Content-type",/json/)
       .expect(200)
@@ -150,7 +150,7 @@ describe('Api::when a user tries to access data that requires authorization', ()
 describe('Api::when a user requests a new authorization token with a valid refresh token', () => {
 
   it('it should return the user an authorization token', (done) => {
-    server
+    SuperTest(app)
       .post(`/api/refreshAuthorizationToken`)
       .send({refreshToken : refreshToken})
       .expect("Content-type",/json/)
@@ -164,7 +164,7 @@ describe('Api::when a user requests a new authorization token with a valid refre
   });
 
   it('it should allow the user to access data requiring authorization, with the new authorizaton token', (done) => {
-    server
+    SuperTest(app)
       .get('/api/users')
       .set({ Authorization:`Bearer ${authorizationToken}`})
       .expect("Content-type",/json/)
@@ -181,7 +181,7 @@ describe('Api::when a user requests a new authorization token with a valid refre
 describe('Api::when a user tries to authorize and does not provide full credentials', () => {
 
   it('it should not supply an authorization token', (done) => {
-    server
+    SuperTest(app)
       .post('/api/users')
       .send({email : 'email@supertester.com', password : 'Password'})
       .expect("Content-type",/json/)
@@ -198,7 +198,7 @@ describe('Api::when a user tries to authorize and does not provide full credenti
 describe('Api::when a user deletes himself', () => {
 
     it('it should return a success message including the users deleted id', (done) => {
-      server
+      SuperTest(app)
         .delete(`/api/users/${userId}`)
         .set({ Authorization:`Bearer ${authorizationToken}`})
         .expect("Content-type",/json/)
@@ -211,7 +211,7 @@ describe('Api::when a user deletes himself', () => {
     });
 
     it('it should not allow the user to authorize with deleted name and password', (done) => {
-      server
+      SuperTest(app)
         .post('/api/authorize')
         .send({email : 'email@supertester.com', password : 'Password'})
         .expect("Content-type",/json/)
@@ -229,7 +229,7 @@ describe('Api::when a user tries to refresh with an expired refresh token', () =
 
   it('', (done) => {
 
-    server
+    SuperTest(app)
     .post('/api/users')
     .send({name : 'Super Test', password : 'Password', email : 'email@supertester.com', clientId:'tester', expires:expired})
     .expect("Content-type",/json/)
@@ -247,7 +247,7 @@ describe('Api::when a user tries to refresh with an expired refresh token', () =
 
   it('', (done) => {
 
-    server
+    SuperTest(app)
       .post('/api/authorize')
       .send({password : 'Password', email : 'email@supertester.com', clientId:'testforanotherclaim', expires:expires})
       .expect("Content-type",/json/)
@@ -262,7 +262,7 @@ describe('Api::when a user tries to refresh with an expired refresh token', () =
 
   it('it should not return the user an authorization token', (done) => {
 
-    server
+    SuperTest(app)
       .post(`/api/refreshAuthorizationToken`)
       .send({refreshToken : refreshToken})
       .expect("Content-type",/json/)
@@ -276,7 +276,7 @@ describe('Api::when a user tries to refresh with an expired refresh token', () =
   });
 
   it('', (done) => {
-    server
+    SuperTest(app)
       .delete(`/api/users/${userId}`)
       .set({ Authorization:`Bearer ${authorizationToken}`})
       .expect("Content-type",/json/)
