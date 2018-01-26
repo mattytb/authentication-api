@@ -5,7 +5,9 @@ node_js:
 install:
 - npm install -g babel-cli
 - npm install
-
+script: 'mocha -g ^Unit --compilers js:babel-core/register --recursive'
+after_success: 'nyc _mocha -g ^Unit --compilers js:babel-core/register --recursive
+  && nyc report --reporter=text-lcov | coveralls'
 before_install:
 - openssl aes-256-cbc -K $encrypted_f4c35811067e_key -iv $encrypted_f4c35811067e_iv -in lib/config.js.enc -out lib/config.js -d
 env:
